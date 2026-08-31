@@ -1,0 +1,271 @@
+{
+  "next_3m_delinquency_flag": {
+    "champion": "improved (gradient boosting, engineered)",
+    "metrics": [
+      {
+        "model": "baseline (logistic, raw columns)",
+        "n_features": 17,
+        "calibrated": false,
+        "n": 15185,
+        "prevalence": 0.05657,
+        "roc_auc": 0.7367,
+        "pr_auc": 0.3596,
+        "pr_auc_lift": 6.36,
+        "recall_at_p50": 0.383,
+        "recall_at_p80": 0.1956,
+        "f1": 0.1752,
+        "brier": 0.212838,
+        "ece": 0.352768
+      },
+      {
+        "model": "improved (gradient boosting, engineered)",
+        "n_features": 43,
+        "calibrated": false,
+        "n": 15185,
+        "prevalence": 0.05657,
+        "roc_auc": 0.7011,
+        "pr_auc": 0.4114,
+        "pr_auc_lift": 7.27,
+        "recall_at_p50": 0.3923,
+        "recall_at_p80": 0.2747,
+        "f1": 0.4453,
+        "brier": 0.056667,
+        "ece": 0.078177
+      },
+      {
+        "model": "improved (gradient boosting, engineered) + platt",
+        "n_features": 43,
+        "calibrated": true,
+        "n": 15185,
+        "prevalence": 0.05657,
+        "roc_auc": 0.7011,
+        "pr_auc": 0.4114,
+        "pr_auc_lift": 7.27,
+        "recall_at_p50": 0.3923,
+        "recall_at_p80": 0.2747,
+        "f1": 0.3111,
+        "brier": 0.040617,
+        "ece": 0.013332
+      }
+    ],
+    "calibration": {
+      "method": "platt",
+      "brier_raw": 0.042263,
+      "brier_platt": 0.029143,
+      "brier_isotonic": null,
+      "brier_improvement": 0.01312,
+      "reason": "Platt chosen; isotonic collapsed the ranking (12 distinct outputs over 10,725 rows, largest tie 43.9% of the sample) and was rejected regardless of its Brier score",
+      "n_calibration_rows": 10725
+    },
+    "prevalence": 0.05656898254856767
+  },
+  "next_6m_delinquency_flag": {
+    "champion": "improved (gradient boosting, engineered)",
+    "metrics": [
+      {
+        "model": "baseline (logistic, raw columns)",
+        "n_features": 16,
+        "calibrated": false,
+        "n": 13337,
+        "prevalence": 0.08533,
+        "roc_auc": 0.6697,
+        "pr_auc": 0.2731,
+        "pr_auc_lift": 3.2,
+        "recall_at_p50": 0.2074,
+        "recall_at_p80": 0.1248,
+        "f1": 0.2109,
+        "brier": 0.233762,
+        "ece": 0.335385
+      },
+      {
+        "model": "improved (gradient boosting, engineered)",
+        "n_features": 41,
+        "calibrated": false,
+        "n": 13337,
+        "prevalence": 0.08533,
+        "roc_auc": 0.6257,
+        "pr_auc": 0.299,
+        "pr_auc_lift": 3.5,
+        "recall_at_p50": 0.2214,
+        "recall_at_p80": 0.1652,
+        "f1": 0.3002,
+        "brier": 0.080385,
+        "ece": 0.071198
+      },
+      {
+        "model": "improved (gradient boosting, engineered) + platt",
+        "n_features": 41,
+        "calibrated": true,
+        "n": 13337,
+        "prevalence": 0.08533,
+        "roc_auc": 0.6257,
+        "pr_auc": 0.299,
+        "pr_auc_lift": 3.5,
+        "recall_at_p50": 0.2214,
+        "recall_at_p80": 0.1652,
+        "f1": 0.1526,
+        "brier": 0.070845,
+        "ece": 0.030779
+      }
+    ],
+    "calibration": {
+      "method": "platt",
+      "brier_raw": 0.054196,
+      "brier_platt": 0.046747,
+      "brier_isotonic": null,
+      "brier_improvement": 0.007449,
+      "reason": "Platt chosen; isotonic collapsed the ranking (18 distinct outputs over 8,804 rows, largest tie 66.7% of the sample) and was rejected regardless of its Brier score",
+      "n_calibration_rows": 8804
+    },
+    "prevalence": 0.08532653520281923
+  },
+  "next_12m_default_flag": {
+    "champion": "baseline (logistic, raw columns)",
+    "metrics": [
+      {
+        "model": "baseline (logistic, raw columns)",
+        "n_features": 16,
+        "calibrated": false,
+        "n": 10992,
+        "prevalence": 0.00864,
+        "roc_auc": 0.8598,
+        "pr_auc": 0.1639,
+        "pr_auc_lift": 18.96,
+        "recall_at_p50": 0.1579,
+        "recall_at_p80": 0.0,
+        "f1": 0.2857,
+        "brier": 0.01094,
+        "ece": 0.011183
+      },
+      {
+        "model": "improved (gradient boosting, engineered)",
+        "n_features": 40,
+        "calibrated": false,
+        "n": 10992,
+        "prevalence": 0.00864,
+        "roc_auc": 0.7238,
+        "pr_auc": 0.0507,
+        "pr_auc_lift": 5.87,
+        "recall_at_p50": 0.0,
+        "recall_at_p80": 0.0,
+        "f1": 0.0,
+        "brier": 0.009011,
+        "ece": 0.006326
+      },
+      {
+        "model": "baseline (logistic, raw columns) + platt",
+        "n_features": 16,
+        "calibrated": true,
+        "n": 10992,
+        "prevalence": 0.00864,
+        "roc_auc": 0.8598,
+        "pr_auc": 0.1639,
+        "pr_auc_lift": 18.96,
+        "recall_at_p50": 0.1579,
+        "recall_at_p80": 0.0,
+        "f1": 0.0,
+        "brier": 0.008356,
+        "ece": 0.005686
+      }
+    ],
+    "calibration": {
+      "method": "platt",
+      "brier_raw": 0.006245,
+      "brier_platt": 0.003856,
+      "brier_isotonic": null,
+      "brier_improvement": 0.002389,
+      "reason": "Platt chosen; isotonic not eligible (4,580 rows, 18 positives against gates of 1,000 and 50) and would overfit this slice",
+      "n_calibration_rows": 4580
+    },
+    "prevalence": 0.008642649199417759
+  },
+  "next_12m_prepayment_flag": {
+    "champion": "improved (gradient boosting, engineered)",
+    "metrics": [
+      {
+        "model": "baseline (logistic, raw columns)",
+        "n_features": 16,
+        "calibrated": false,
+        "n": 10992,
+        "prevalence": 0.09125,
+        "roc_auc": 0.5312,
+        "pr_auc": 0.1003,
+        "pr_auc_lift": 1.1,
+        "recall_at_p50": 0.0,
+        "recall_at_p80": 0.0,
+        "f1": 0.1514,
+        "brier": 0.209705,
+        "ece": 0.24765
+      },
+      {
+        "model": "improved (gradient boosting, engineered)",
+        "n_features": 40,
+        "calibrated": false,
+        "n": 10992,
+        "prevalence": 0.09125,
+        "roc_auc": 0.5779,
+        "pr_auc": 0.1348,
+        "pr_auc_lift": 1.48,
+        "recall_at_p50": 0.0,
+        "recall_at_p80": 0.0,
+        "f1": 0.1796,
+        "brier": 0.116804,
+        "ece": 0.109096
+      },
+      {
+        "model": "improved (gradient boosting, engineered) + platt",
+        "n_features": 40,
+        "calibrated": true,
+        "n": 10992,
+        "prevalence": 0.09125,
+        "roc_auc": 0.5779,
+        "pr_auc": 0.1348,
+        "pr_auc_lift": 1.48,
+        "recall_at_p50": 0.0,
+        "recall_at_p80": 0.0,
+        "f1": 0.0,
+        "brier": 0.083741,
+        "ece": 0.034371
+      }
+    ],
+    "calibration": {
+      "method": "platt",
+      "brier_raw": 0.138496,
+      "brier_platt": 0.10999,
+      "brier_isotonic": null,
+      "brier_improvement": 0.028506,
+      "reason": "Platt chosen; isotonic collapsed the ranking (15 distinct outputs over 4,580 rows, largest tie 29.3% of the sample) and was rejected regardless of its Brier score",
+      "n_calibration_rows": 4580
+    },
+    "prevalence": 0.09124818049490539
+  },
+  "next_state": {
+    "champion": "hierarchical (stage A + stage B)",
+    "metrics": [
+      {
+        "model": "persistence baseline",
+        "n": 15963,
+        "accuracy": 0.9644,
+        "macro_f1": 0.6585,
+        "weighted_f1": 0.9628,
+        "log_loss": 0.73868
+      },
+      {
+        "model": "flat multiclass",
+        "n": 15963,
+        "accuracy": 0.9456,
+        "macro_f1": 0.3653,
+        "weighted_f1": 0.9429,
+        "log_loss": 0.65152
+      },
+      {
+        "model": "hierarchical (stage A + stage B)",
+        "n": 15963,
+        "accuracy": 0.9647,
+        "macro_f1": 0.6031,
+        "weighted_f1": 0.9596,
+        "log_loss": 0.19643
+      }
+    ]
+  }
+}

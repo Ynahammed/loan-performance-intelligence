@@ -1,0 +1,34 @@
+# Data: synthetic dev pack IS tracked (clone-and-run, no extra step for
+# judges/teammates). If/when the real organizer data pack replaces it,
+# add a real_data/ override rule here instead of re-excluding data/.
+# data/*.csv
+# data/*.json
+
+# Models / artifacts
+models/*.joblib
+models/*.pkl
+!models/.gitkeep
+
+# Logs
+logs/*.jsonl
+!logs/.gitkeep
+# EXCEPT the LLM audit trail: Task 7 requires prompt logs and the judging
+# criteria name them explicitly, so this is a deliverable, not a runtime
+# artifact. It contains prompts, outputs and guardrail verdicts about
+# synthetic loans -- no credentials, no real borrower data.
+!logs/llm_calls.jsonl
+
+# Env
+.env
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# OS
+.DS_Store

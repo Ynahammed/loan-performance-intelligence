@@ -1,0 +1,40 @@
+{
+  "rules": [
+    {
+      "rule_id": "balance_non_increasing",
+      "description": "current_balance should not increase month-over-month unless modification_flag=1",
+      "severity": "high",
+      "applies_to": "loan_monthly_performance"
+    },
+    {
+      "rule_id": "date_order_valid",
+      "description": "reporting_month must be >= origination_month",
+      "severity": "high",
+      "applies_to": "loan_monthly_performance"
+    },
+    {
+      "rule_id": "dpd_status_consistency",
+      "description": "days_past_due must be consistent with current_status band (e.g. Current=0, 90DPD>=60)",
+      "severity": "medium",
+      "applies_to": "loan_monthly_performance"
+    },
+    {
+      "rule_id": "terminal_state_immutability",
+      "description": "once a loan reaches Default or Prepaid, no subsequent row may show current_status=Current for the same loan without an explicit correction record",
+      "severity": "high",
+      "applies_to": "loan_monthly_performance"
+    },
+    {
+      "rule_id": "document_completeness_at_closure",
+      "description": "document_status should be 'Complete' when current_status is Default or Prepaid",
+      "severity": "medium",
+      "applies_to": "loan_monthly_performance"
+    },
+    {
+      "rule_id": "servicer_source_agreement",
+      "description": "current_balance and current_status reported by servicer_updates.csv should match the main panel within tolerance for the same loan_id/reporting_month",
+      "severity": "medium",
+      "applies_to": "cross_source"
+    }
+  ]
+}

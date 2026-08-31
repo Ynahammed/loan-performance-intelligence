@@ -1,0 +1,85 @@
+{
+  "one_step_comparison": {
+    "n": {
+      "empirical baseline": 15445.0,
+      "covariate transition model": 15445.0,
+      "delta": 0.0
+    },
+    "log_loss": {
+      "empirical baseline": 0.144562,
+      "covariate transition model": 0.144201,
+      "delta": -0.000361
+    },
+    "macro_f1": {
+      "empirical baseline": 0.413453,
+      "covariate transition model": 0.403753,
+      "delta": -0.009699
+    },
+    "accuracy": {
+      "empirical baseline": 0.964196,
+      "covariate transition model": 0.962771,
+      "delta": -0.001424
+    },
+    "auc_Current": {
+      "empirical baseline": 0.771331,
+      "covariate transition model": 0.812008,
+      "delta": 0.040678
+    },
+    "auc_30DPD": {
+      "empirical baseline": 0.726415,
+      "covariate transition model": 0.788708,
+      "delta": 0.062293
+    },
+    "auc_60DPD": {
+      "empirical baseline": 0.993126,
+      "covariate transition model": 0.993262,
+      "delta": 0.000136
+    },
+    "auc_90DPD": {
+      "empirical baseline": 0.997983,
+      "covariate transition model": 0.997983,
+      "delta": 0.0
+    },
+    "auc_Default": {
+      "empirical baseline": 0.99908,
+      "covariate transition model": 0.99908,
+      "delta": 0.0
+    },
+    "auc_Prepaid": {
+      "empirical baseline": 0.508654,
+      "covariate transition model": 0.521362,
+      "delta": 0.012709
+    }
+  },
+  "scenario_summary": {
+    "default_12m": {
+      "base": 0.01355,
+      "adverse_credit": 0.03224,
+      "high_prepayment": 0.01001
+    },
+    "prepaid_12m": {
+      "base": 0.16044,
+      "adverse_credit": 0.09378,
+      "high_prepayment": 0.30618
+    },
+    "delinquency_12m": {
+      "base": 0.02574,
+      "adverse_credit": 0.03985,
+      "high_prepayment": 0.01864
+    }
+  },
+  "crosscheck_12m_default": {
+    "n": 6693,
+    "observed_rate": 0.009861048857014791,
+    "predicted_rate": 0.01211739202144385,
+    "brier": 0.007428432286501457,
+    "roc_auc": 0.8463105477591669
+  },
+  "transition_frame": {
+    "input_rows": 47883,
+    "terminal_rows_dropped": 1932,
+    "gap_rows_dropped": 469,
+    "label_disagreements": 27,
+    "usable": 45482
+  }
+}

@@ -1,0 +1,4 @@
+scenario_name,rate_shock_bps,unemployment_shock_pts,hpi_shock_pct,default_multiplier,delinquency_multiplier,prepayment_multiplier
+base,0,0.0,0.0,1.0,1.0,1.0
+adverse_credit,150,2.5,-8.0,1.85,1.55,0.55
+high_prepayment,-125,-0.3,3.0,0.9,0.92,2.2

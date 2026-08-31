@@ -1,0 +1,31 @@
+# Core
+pandas>=2.0
+numpy>=1.26
+scikit-learn>=1.4
+xgboost>=2.0
+
+# Survival modeling
+lifelines>=0.28
+
+# Explainability
+shap>=0.45
+
+# Dashboard
+streamlit>=1.35
+plotly>=5.20
+matplotlib>=3.8
+
+# Config / env
+pydantic>=2.6
+pydantic-settings>=2.2
+python-dotenv>=1.0
+
+# LLM providers
+groq>=0.9
+openai>=1.30
+
+# Testing
+pytest>=8.0
+
+# Persistence
+joblib>=1.4
