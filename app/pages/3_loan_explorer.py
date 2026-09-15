@@ -64,7 +64,7 @@ if len(history):
     st.subheader("Servicing history")
     fig = px.line(history, x="reporting_month", y="current_balance", markers=False)
     fig.update_layout(height=280, xaxis_title="", yaxis_title="current balance")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     status = history[["reporting_month", "current_status", "days_past_due"]].copy()
     status["reporting_month"] = status.reporting_month.dt.strftime("%Y-%m")
@@ -78,7 +78,7 @@ if len(history):
     else:
         st.caption("Current in every observed month.")
     with st.expander("Month-by-month status"):
-        st.dataframe(status, use_container_width=True, hide_index=True)
+        st.dataframe(status, width="stretch", hide_index=True)
 
 # ------------------------------------------------------------ scores
 st.subheader("Scored months")
@@ -90,7 +90,7 @@ else:
         c for c in ("next_state_pred", "next_state_confidence",
                     "exception_type_pred", "anomaly_score",
                     "model_confidence") if c in rows.columns]
-    st.dataframe(rows[show], use_container_width=True, hide_index=True)
+    st.dataframe(rows[show], width="stretch", hide_index=True)
 
     st.subheader("What the model weighted")
     st.caption(

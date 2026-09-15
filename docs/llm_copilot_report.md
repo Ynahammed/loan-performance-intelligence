@@ -11,15 +11,15 @@ Active provider: **groq** (`openai/gpt-oss-120b`).
 
 **LN100023 · 2023-09-01** — model estimate 78.85%
 
-> Loan LN100023 is currently 60 DPD. The model predicts a 0.78847 probability of delinquency in the next three months. The model weighted “consecutive months currently delinquent” most heavily (contribution 6.13544), followed by “days past due” (1.99529), “payment status” (0.21689), and “refinance incentive versus other loans that month” (0.16743). An anomaly score of 0.6971 was flagged, driven by “balance movement over the last three months” that is above normal with 59.8 robust deviations. No exception was required. This note is a recommendation for review, not a decision.
+> Loan LN100023 is currently 60 DPD. The model predicts a 0.78847 probability of delinquency in the next three months. The model weighted “consecutive months currently delinquent” most heavily (contribution 6.13544), followed by “days past due” (1.99529), “payment status” (0.21689), and “refinance incentive versus other loans that month” (0.16743). An anomaly score of 0.6971 was flagged, driven by “balance movement over the last three months” being above expectations with 59.8 robust deviations. No exception was required. This note is a recommendation for review, not a decision.
 
 **LN100175 · 2023-09-01** — model estimate 78.85%
 
-> Loan LN100175 is currently 60 days past due. The model predicts a 0.78847 probability of delinquency in the next three months. The model weighted “consecutive months currently delinquent” (contribution 6.35115) and “days past due” (2.15987) as strong risk‑increasing factors, along with “payment status” (0.26087). The “original loan amount” contributed –0.22205, reducing risk. An anomaly score of 0.7101 was flagged, driven by balance movement over the last three months (above, 59.8 robust deviations), original loan amount (above, 7.38), and current balance (above, 7.19). No exception was required. This note is a recommendation for review, not a decision.
+> Loan LN100175 is currently 60 DPD. The model predicts a 0.78847 probability of delinquency in the next three months. The model weighted consecutive months currently delinquent (+6.35115), days past due (+2.15987), and payment status (+0.26087) as risk‑increasing factors, and original loan amount (‑0.22205) as a risk‑reducing factor. An anomaly score of 0.7101 was observed, driven by balance movement over the last three months (59.8 robust deviations), original loan amount (7.38), and current balance (7.19), all above expected levels. No exception was flagged. This is a recommendation for review, not a decision.
 
 **LN100175 · 2023-10-01** — model estimate 78.85%
 
-> Loan LN100175 is currently 60 days past due. The model predicts a 0.78847 probability of delinquency in the next three months. The model weighted “consecutive months currently delinquent” (contribution 6.15458), “days past due” (2.09981), and “payment status” (0.25894) as increasing risk, while “original loan amount” (‑0.24515) reduced risk. An anomaly score of 0.7329 was flagged, driven by balance movement over the last three months (robust deviations 59.8), original loan amount (7.38), and current balance (7.19), all above expected levels. No exception was applied. This note is a recommendation for review, not a decision.
+> Loan LN100175 is currently 60 days past due. The model predicts a 0.78847 probability of delinquency in the next three months. The model weighted consecutive months currently delinquent (contribution 6.15458) and days past due (2.09981) as risk‑increasing factors, along with payment status (0.25894). The original loan amount contributed ‑0.24515, reducing risk. An anomaly score of 0.7329 was observed, driven by balance movement over the last three months (robust deviations 59.8), original loan amount (7.38), and current balance (7.19) above expected levels. This is a recommendation for review, not a decision.
 
 **LN100288 · 2023-06-01** — model estimate 78.85%
 
@@ -27,16 +27,16 @@ Active provider: **groq** (`openai/gpt-oss-120b`).
 
 **LN100288 · 2023-07-01** — model estimate 78.85%
 
-> Loan LN100288 is currently 60DPD. The model predicts a 0.78847 probability of delinquency in the next three months. The model weighted consecutive months currently delinquent (contribution 6.17089, increases risk), days past due (1.95674, increases risk), months since origination (0.44207, increases risk), and loan‑to‑value ratio (‑0.28871, reduces risk). An anomaly score of 0.7032 was flagged, driven by balance movement over the last three months (above, 59.8 robust deviations) and months since origination (above, 3.4 robust deviations). No exception was required. This note is a recommendation for review, not a decision.
+> Loan LN100288 is currently 60 days past due. The model predicts a 0.78847 probability of delinquency in the next three months. The model weighted consecutive months currently delinquent (contribution 6.17089, increases risk), days past due (1.95674, increases risk), months since origination (0.44207, increases risk), and loan‑to‑value ratio (‑0.28871, reduces risk). An anomaly score of 0.7032 was flagged, driven by balance movement over the last three months (59.8 robust deviations, above) and months since origination (3.4 robust deviations, above). No exception was required. This note is a recommendation for review, not a decision.
 
 **LN100288 · 2023-08-01** — model estimate 78.85%
 
-> Loan LN100288 is currently 60DPD. The model predicts a 0.78847 probability of delinquency in the next three months. The model weighted consecutive months currently delinquent (contribution 6.17199) and days past due (1.96227) as increasing risk, as well as months since origination (0.43754). The loan‑to‑value ratio was weighted to reduce risk (‑0.28762). An anomaly score of 0.7315 was flagged, driven by balance movement over the last three months (above, 59.8 robust deviations), distance from the contractual payment schedule (above, 3.97), and months since origination (above, 3.5). No exception was required. This note is a recommendation for review, not a decision.
+> The model predicts a 0.78847 probability of delinquency in the next three months. The model weighted consecutive months currently delinquent (contribution 6.17199), days past due (1.96227), months since origination (0.43754), and loan‑to‑value ratio (‑0.28762). An anomaly score of 0.7315 was observed, driven by balance movement over the last three months (robust deviations 59.8, above), distance from the contractual payment schedule (3.97, above), and months since origination (3.5, above). No exception was flagged. This note is a recommendation for review, not a decision.
 
 ## Scenario summary
 
 ```
-The 12‑month horizon simulation shows a base‑case default rate of 0.01355 and a prepaid rate of 0.16044. In the **adverse_credit** scenario the model weighted default up to 0.03224 (a change of +0.01869 versus base) and prepaid down to 0.09378 (a change of ‑0.06666). In the **high_prepayment** scenario the model weighted default down to 0.01001 (a change of ‑0.00354) and prepaid up to 0.30618 (a change of +0.14574). The largest movements are the default increase of +0.01869 in the adverse_credit scenario and the prepaid increase of +0.14574 in the high_prepayment scenario. These results are simulations under the stated assumptions, not forecasts, and constitute a recommendation for review, not a decision.
+The model weighted default and prepaid segments across three 12‑month scenarios. In the base scenario the portfolio shows a default rate of **0.01355** (1.355 %) and a prepaid rate of **0.16044** (16.044 %). Under the adverse‑credit scenario the model weighted default up to **0.03224** (3.224 %), a change of **0.01869** (1.869 %) versus base, while prepaid was weighted down to **0.09378** (9.378 %), a change of **‑0.06666** (‑6.666 %). In the high‑prepayment scenario the model weighted default down to **0.01001** (1.001 %), a change of **‑0.00354** (‑0.354 %), and prepaid up to **0.30618** (30.618 %), a change of **0.14574** (14.574 %). The prepaid segment exhibits the largest relative movements across scenarios. These are simulations under the stated assumptions, not forecasts. This summary is a recommendation for review, not a decision.
 ```
 
 ## Documentation retrieval
@@ -70,15 +70,15 @@ Every injected failure class was caught. The text above was written by us, not p
 
 ```
 {
-  "total_calls": 20,
+  "total_calls": 21,
   "reached_the_guardrail": 20,
   "accepted": 13,
   "rejected_by_guardrail": 7,
-  "provider_errors": 0,
+  "provider_errors": 1,
   "empty_completions": 0,
   "rejection_rate": 0.35,
   "by_provider": {
-    "groq/openai/gpt-oss-120b": 14,
+    "groq/openai/gpt-oss-120b": 15,
     "fault-injection/synthetic-faults-v1": 6
   },
   "rejections_by_check": {
@@ -89,7 +89,7 @@ Every injected failure class was caught. The text above was written by us, not p
     "no_decision_language": 1,
     "no_false_certainty": 1
   },
-  "median_latency_ms": 1813.23
+  "median_latency_ms": 2215.6
 }
 ```
 

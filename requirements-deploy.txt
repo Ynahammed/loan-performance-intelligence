@@ -1,0 +1,15 @@
+# Deployment requirements: what the DASHBOARD needs, not the pipelines.
+#
+# The app reads artifacts and trains nothing, so it does not need
+# lifelines (survival baselines), shap (attribution) or pytest. Omitting
+# them cuts install time and memory on a free hosting tier, where both
+# are the binding constraint.
+#
+# Use requirements.txt to run the pipelines; this file to serve the app.
+pandas>=2.0
+numpy>=1.26
+scikit-learn>=1.4
+streamlit>=1.35
+plotly>=5.20
+joblib>=1.4
+python-dotenv>=1.0

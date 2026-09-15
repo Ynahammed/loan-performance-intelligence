@@ -151,3 +151,16 @@ state             CA         196         0.04350  0.02119          0.01598    2.
 vintage           2021       288         0.03794  0.01576          0.01164    2.21844
 credit_score_band <620       79          0.03883  0.01675          0.01203    2.20750
 ```
+
+### Monte Carlo portfolio simulation
+
+The deterministic chain gives the EXPECTED portfolio default rate. It says nothing about how far a realised outcome could sit from that expectation, and with 1,461 loans that spread is not negligible. Sampling whole trajectories gives the distribution.
+
+```
+simulations        : 300
+loans per path     : 1,461
+12m default, mean  : 0.0135
+12m default, p5-p95: 0.0089 to 0.0185
+```
+
+At 12 months the sampled mean is 0.0135 against the deterministic curve's 0.0135. Those should agree closely -- if they did not, one of the two would be wrong, so this doubles as a check on the chain rather than only an addition to it. The 5th-to-95th percentile band spans 0.0089 to 0.0185.

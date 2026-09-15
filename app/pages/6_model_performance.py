@@ -62,7 +62,7 @@ for target, label in LABELS.items():
         "ECE": best["ece"],
         "Champion": entry["champion"],
     })
-st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
 
 st.warning(
     "**Two results that did not go our way, reported rather than buried.** "
@@ -80,7 +80,7 @@ target = st.selectbox("Target", list(LABELS), format_func=lambda k: LABELS[k])
 entry = supervised.get(target)
 if entry:
     st.dataframe(pd.DataFrame(entry["metrics"]),
-                 use_container_width=True, hide_index=True)
+                 width="stretch", hide_index=True)
     cal = entry.get("calibration")
     if cal:
         st.subheader("Calibration")
@@ -102,7 +102,7 @@ ns = supervised.get("next_state")
 if ns:
     st.subheader("Next-state prediction")
     st.dataframe(pd.DataFrame(ns["metrics"]),
-                 use_container_width=True, hide_index=True)
+                 width="stretch", hide_index=True)
     st.caption(
         "The persistence baseline wins macro-F1 by refusing to predict "
         "change at all, while being roughly 3.8x worse as a probability. It "
@@ -125,7 +125,7 @@ try:
                      color="confidence" if "confidence" in unc.columns else None)
     fig.update_layout(height=360, xaxis_title="mean prediction across folds",
                       yaxis_title="spread across folds")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
     st.caption(
         "Uncertainty is dispersion across models refitted on different "
         "expanding time windows — not a bootstrap. Sampling noise is not "

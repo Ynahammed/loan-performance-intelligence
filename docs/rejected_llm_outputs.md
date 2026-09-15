@@ -151,10 +151,16 @@ VERDICT: REJECTED
 
 ## Section 2 — rejections from a live provider
 
-1 live generations were rejected by the guardrail.
+2 live generations were rejected by the guardrail.
 
-### 2026-08-31T07:50:22.204200+00:00 · openai/gpt-oss-120b · attempt 1
+### 2026-08-31T09:34:44.331325+00:00 · openai/gpt-oss-120b · attempt 1
 
-> Loan LN100058 is current. The model predicts a 2.0% chance of delinquency in the next 3 months (0.02026). The model weighted risk reductions from number of status changes (-0.41367), distance from schedule (-0.40648) and original loan amount (-0.40255), and a risk increase from record data-quality score (0.3808). An anomaly score of 0.6294 was flagged, driven by above‑average balance movement (13,104.95), distance from schedule (608.41) and share of original balance outstanding (60.38). An exception was raised for balance increase without a recorded modification, breaking two rules. Recommend 
+> Loan LN100028 (reporting month 2023-01-01) is currently Current with a predicted 3‑month delinquency probability of 0.01898. The model weighted months since origination (contribution 0.62897, increases risk), distance from the contractual payment schedule (‑0.61858, reduces risk), current balance (‑0.399, reduces risk) and months left on the term (‑0.39453, reduces risk). An anomaly score of 0.663 was flagged, driven by balance movement over the last three months (robust deviation 13893.62), distance from schedule (665.6) and share of original balance outstanding (60.38), all above expected. A
 
 Failed checks: carries_disclaimer
+
+### 2026-08-31T09:35:05.755917+00:00 · openai/gpt-oss-120b · attempt 1
+
+> 
+
+Failed checks: 

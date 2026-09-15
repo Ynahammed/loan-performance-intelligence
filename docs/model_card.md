@@ -80,6 +80,19 @@ Held out, purged, and label-mature. PR-AUC is the headline rather than ROC-AUC: 
 | 12-month default | 0.86% | 0.1639 | 0.1639 | 18.96x | 0.8598 | 0.1579 | 0.008356 | 0.005686 |
 | 12-month prepayment | 9.12% | 0.1003 | 0.1348 | 1.48x | 0.5779 | 0.0 | 0.083741 | 0.034371 |
 
+### Confidence intervals
+
+95% percentile intervals, bootstrapped **clustered by loan**. The same borrower contributes many correlated rows, so resampling rows individually would treat one loan's history as many independent observations and report an interval far narrower than the evidence supports.
+
+| Target | ROC-AUC | PR-AUC |
+|---|---|---|
+| 3-month delinquency | 0.7011 [0.6674, 0.7371] | 0.4114 [0.3459, 0.4675] |
+| 6-month delinquency | 0.6257 [0.5883, 0.6634] | 0.299 [0.2408, 0.3559] |
+| 12-month default | 0.8598 [0.7722, 0.9244] | 0.1639 [0.0327, 0.3322] |
+| 12-month prepayment | 0.5779 [0.5329, 0.6229] | 0.1348 [0.1046, 0.1757] |
+
+The 12-month default interval is the one to read carefully: roughly 66 events support it, and its PR-AUC interval spans [0.0327, 0.3322]. A point estimate quoted alone would invite more confidence than the data carries.
+
 Next-state prediction, against two baselines:
 
 | Model | Accuracy | Macro-F1 | Log-loss |
@@ -121,9 +134,24 @@ These are measured, not anticipated. Each is reproducible from the artifact name
 
 **Prepayment is close to unpredictable out of time.** ROC-AUC 0.5779, and recall at 50% precision is 0.0 — meaning a precision-controlled prepayment review queue cannot be operated at all on this data. The `rate_incentive` feature is strongly predictive *within* a period (prepayment rises from 6.3% to 30.2% across training-window incentive quintiles) but the relationship does not transfer: the same spread collapses to 1.6x in the test window as the rate environment shifts. The drift analysis had flagged `interest_rate` as the single largest source of train/test separation before the model was trained. A period-relative version of the feature recovered only 0.561 to 0.575 ROC-AUC. *(`model_performance_report.md`, `data_intelligence_report.md`)*
 
+**How much of the difficulty is time, and how much is the data.** A weak out-of-time score has two very different causes with opposite remedies, so the same recipe was fitted twice per target: chronologically with a purge gap, and under a loan-disjoint random split that lets the model see the future.
+
+| Target | Temporal lift | Random lift (ceiling) | Lost to time |
+|---|---|---|---|
+| 3-month delinquency | 6.945x | 10.112x | 31% |
+| 6-month delinquency | 3.47x | 3.768x | 8% |
+| 12-month default | 3.023x | 42.463x | 93% |
+| 12-month prepayment | 1.117x | 1.782x | 37% |
+
+> The random column is a **diagnostic ceiling, not a performance claim**. It leaks the future and must never be quoted as deployment performance; only the temporal column is a real estimate. Its purpose is to separate "the signal does not transfer" from "the signal was never there".
+
+For prepayment specifically this is decisive: even with the future visible, ROC-AUC reaches only 0.6261. The ceiling itself is low, so the weak out-of-time result is a property of this synthetic data rather than a modelling failure that more feature work would fix. On real loan-level data prepayment is among the more predictable quantities in mortgage finance, driven by refinance incentive; this pack does not reproduce that.
+
 **The delinquency models largely read current delinquency state.** At the 50%-precision operating point, false positives carry `days_past_due` of 12.4 against 0.13 for true negatives (+1.13 sd) — loans already delinquent that then cure. False negatives carry 0.0 against 45.8 for true positives (-2.75 sd) — clean loans taking a first slip. The model is strong on "already sliding keeps sliding" and close to blind on "clean loan, first miss", which is the case a reviewer most wants flagged. *(`explainability_report.md`)*
 
-**Engineered features add nothing to 12-month default.** The logistic baseline and the gradient-boosted model tie, and the baseline is champion. With roughly 66 events in the evaluation window there is not enough signal to pay for the extra capacity. The target still has the best ROC-AUC and the highest lift of the four, but any conclusion drawn from it rests on very few events. *(`model_performance_report.md`)*
+**Engineered features add nothing to 12-month default, and the ceiling table above says why.** The logistic baseline and the gradient-boosted model tie, and the baseline is champion. That is not luck: fitted under a random split the boosted model reaches 42.5x lift, and chronologically it reaches 3.0x -- it loses 93% of its edge to temporal transfer, the worst of the four targets by a wide margin. With roughly 66 events it finds period-specific structure that evaporates the moment it is asked to predict forward, while the far more constrained logistic model generalises. The right answer to "why not use a more powerful model here" is that it was tried and it did not survive the split. *(`model_performance_report.md`)*
+
+**Calibration holds in aggregate and fails by vintage.** Overall expected calibration error on 3-month delinquency is around 0.01, which looks healthy. Split by origination cohort it is not: the model under-predicts the 2022 vintage by 2.2 percentage points (3.8% predicted against 6.0% observed) and the 2021 vintage by 1.1, while sitting within 0.5 points on 2019 and 2020. Errors in opposite directions cancel in the aggregate, so a single ECE figure conceals a systematic under-call on recent originations. This is the same shift the drift analysis found: newer cohorts were originated into a different rate environment, and a model fitted mostly on older ones under-states their risk. *(`model_performance_report.md`, calibration by vintage)*
 
 **Predictions are unstable across training periods.** Refitting on expanding time windows and scoring the same rows, the spread between fold models exceeds the prediction itself on 67.5% of rows. `model_confidence` in the submission reports this per record. *(`explainability_report.md`, `data/derived/uncertainty.csv`)*
 
@@ -131,13 +159,47 @@ These are measured, not anticipated. Each is reproducible from the artifact name
 
 **No cure transitions exist in this synthetic pack.** Zero observed transitions out of 60DPD or 90DPD back toward current. Real servicing data has substantial cure rates, so the transition matrix is optimistic about severity progression. The state machine is declared generally rather than narrowed to what was observed, so cures are representable if a real pack contains them. *(`survival_report.md`)*
 
+## 8b. Performance across segments
+
+A diagnostic, not a verdict. A gap here has several possible causes -- genuinely different risk, different base rates, or the model serving one group worse than another -- and this table cannot separate them. It says where to look.
+
+`selection_rate` is the share of a segment flagged at the operating threshold (the 95th percentile of predicted risk). A large gap in selection rate alongside a similar observed rate is the pattern worth investigating.
+
+**3-month delinquency by credit score band**
+
+| Segment | n | Observed | Predicted | Selection rate | ROC-AUC |
+|---|---|---|---|---|---|
+| 620-659 | 1,542 | 0.087 | 0.062 | 0.077 | 0.6801 |
+| <620 | 768 | 0.079 | 0.061 | 0.062 | 0.7502 |
+| 660-699 | 2,453 | 0.058 | 0.044 | 0.042 | 0.7394 |
+| 700-739 | 4,009 | 0.054 | 0.049 | 0.046 | 0.7185 |
+| 740-779 | 3,509 | 0.053 | 0.049 | 0.059 | 0.6734 |
+| 780+ | 2,904 | 0.041 | 0.038 | 0.034 | 0.6394 |
+
+**3-month delinquency by state**
+
+| Segment | n | Observed | Predicted | Selection rate | ROC-AUC |
+|---|---|---|---|---|---|
+| AZ | 1,135 | 0.071 | 0.059 | 0.063 | 0.7591 |
+| NY | 1,393 | 0.067 | 0.045 | 0.035 | 0.6115 |
+| FL | 1,710 | 0.067 | 0.045 | 0.042 | 0.7056 |
+| CA | 2,365 | 0.058 | 0.045 | 0.039 | 0.704 |
+| OH | 975 | 0.056 | 0.048 | 0.040 | 0.6485 |
+| NC | 767 | 0.056 | 0.046 | 0.046 | 0.7706 |
+| GA | 1,096 | 0.056 | 0.054 | 0.052 | 0.7491 |
+| IL | 1,290 | 0.052 | 0.047 | 0.056 | 0.6745 |
+| PA | 886 | 0.052 | 0.050 | 0.045 | 0.7613 |
+| TX | 1,940 | 0.051 | 0.059 | 0.098 | 0.7289 |
+| MI | 724 | 0.046 | 0.047 | 0.046 | 0.6352 |
+| WA | 904 | 0.033 | 0.026 | 0.012 | 0.6782 |
+
 ## 9. Limitations
 
 - The dataset is synthetic and roughly 5x smaller than the challenge specification suggests (47,883 rows against 250,000+). Rare-event targets are thin: 12-month default has 49 state transitions in the entire panel.
-- Metrics carry no confidence intervals. At these event counts the uncertainty around a PR-AUC is material and is not quantified.
+- Confidence intervals are bootstrapped clustered by loan and are wide on the rare targets, which is the honest picture rather than a reassuring one. They quantify sampling uncertainty only; they say nothing about whether the next period resembles this one, which section 8 shows is the larger risk.
 - Forward simulation holds credit band, LTV, state and servicer fixed, modelling only mechanical evolution (ageing, scheduled amortisation). Borrower re-underwriting and servicing transfers are not modelled.
 - Scenario multipliers are applied as declared in `macro_scenarios.csv`. The engine propagates them faithfully; it does not validate that they are plausible.
-- No fairness analysis has been run. State and credit band are used as features, and their disparate impact is unmeasured.
+- Segment performance is reported in section 8b, but a disparity table is not a fairness assessment. Deciding whether a gap is unjust needs context about the lending decisions these scores feed into, which this system does not have and should not assume.
 
 ## 10. Reproducibility
 

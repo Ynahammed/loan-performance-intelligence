@@ -136,13 +136,29 @@ def load_markdown(name: str) -> str:
 
 @st.cache_data(show_spinner=False)
 def load_panel(sample: int = None) -> pd.DataFrame:
-    """The training panel. Sampled by default -- 47,883 rows is more than
-    any table on screen needs, and loading it whole makes every page slow
-    for a view nobody scrolls."""
+    """The training panel WITH origination attributes joined on.
+
+    The join is not optional. Every pipeline calls
+    `attach_static_attributes` before engineering features, so the models
+    were fitted on a frame that includes `vintage` and
+    `original_term_months`. Loading the raw panel without them makes the
+    what-if simulator silently skip three of its four targets: the models
+    that need those columns are dropped, and only the one champion that
+    happens to be a logistic baseline on raw columns still scores. Nothing
+    errors -- the page just quietly shows one row instead of four.
+    """
     df = pd.read_csv(
         DATA_DIR / "loan_monthly_performance_train.csv",
         parse_dates=["reporting_month", "origination_month"],
     )
+    static_path = DATA_DIR / "loan_static_attributes.csv"
+    if static_path.exists():
+        static = pd.read_csv(static_path, parse_dates=["origination_month"])
+        new_cols = [c for c in static.columns
+                    if c == "loan_id" or c not in df.columns]
+        before = len(df)
+        df = df.merge(static[new_cols], on="loan_id", how="left", validate="m:1")
+        assert len(df) == before, "static join changed the row count"
     if sample and len(df) > sample:
         return df.sample(sample, random_state=42)
     return df

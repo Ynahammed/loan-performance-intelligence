@@ -52,7 +52,7 @@ bands = pd.DataFrame({
 })
 fig = px.bar(bands, x="band", y="records", text="records")
 fig.update_layout(height=300, showlegend=False, xaxis_title="", yaxis_title="records")
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width="stretch")
 
 # ------------------------------------------------------------ by month
 st.subheader("Quality by reporting month")
@@ -66,7 +66,7 @@ monthly = quality.assign(
 ).groupby("month")[score_col].agg(["mean", "size"]).reset_index()
 fig = px.line(monthly, x="month", y="mean", markers=True)
 fig.update_layout(height=320, yaxis_title="mean quality score", xaxis_title="")
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width="stretch")
 
 worst = monthly.nsmallest(3, "mean")
 if len(worst) and worst["mean"].iloc[0] < 60:
@@ -86,7 +86,7 @@ st.subheader("Validation rules")
 counts = (flags[rule_cols].sum().sort_values(ascending=False)
           .rename("records flagged").to_frame().reset_index()
           .rename(columns={"index": "rule"}))
-st.dataframe(counts, use_container_width=True, hide_index=True)
+st.dataframe(counts, width="stretch", hide_index=True)
 
 st.info(
     "Measured against the shipped labels, the deterministic rules resolve "
@@ -106,7 +106,49 @@ merged = worst_records.merge(
         reporting_month=lambda d: d.reporting_month.astype(str)),
     on=["loan_id", "reporting_month"], how="left",
 )
-st.dataframe(merged, use_container_width=True, hide_index=True)
+st.dataframe(merged, width="stretch", hide_index=True)
+
+# ------------------------------------------------------------ drift
+st.subheader("Train vs test drift")
+st.caption(
+    "Computed by `run_data_intelligence` and shown here rather than left "
+    "in a markdown file. PSI is univariate and cannot see a joint shift; "
+    "the adversarial classifier can, and names the columns responsible."
+)
+
+report = load_markdown("data_intelligence_report.md")
+psi_block, adv_block = "", ""
+if report:
+    import re
+    m = re.search(r"## 8\. Train vs test drift \(PSI\)\s*```(.*?)```",
+                  report, re.DOTALL)
+    psi_block = m.group(1).strip() if m else ""
+    m = re.search(r"## 9\. Adversarial validation\s*```(.*?)```",
+                  report, re.DOTALL)
+    adv_block = m.group(1).strip() if m else ""
+
+if psi_block:
+    left, right = st.columns([3, 2])
+    with left:
+        st.markdown("**Population Stability Index, worst first**")
+        st.code(psi_block, language="text")
+    with right:
+        st.markdown("**Adversarial validation**")
+        st.code(adv_block or "not available", language="text")
+    st.info(
+        "The two adversarial runs matter. **With** time-index columns a "
+        "chronological split separates almost perfectly — that restates "
+        "how the split was made, not a finding. **Without** them, the "
+        "question becomes whether the cross-section itself has moved. It "
+        "has: `interest_rate` is the single largest source of separation, "
+        "which is why the prepayment model does not transfer out of time.",
+        icon="📉",
+    )
+else:
+    st.caption(
+        "Run `python -m scripts.run_data_intelligence` to generate the "
+        "drift analysis."
+    )
 
 with st.expander("Full data intelligence report"):
     report = load_markdown("data_intelligence_report.md")

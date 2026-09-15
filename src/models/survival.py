@@ -963,3 +963,126 @@ def cox_baseline(tte: pd.DataFrame, covariates: pd.DataFrame, event_column: str 
     cph = CoxPHFitter(penalizer=0.1)
     cph.fit(fit_df, duration_col="duration_months", event_col=event_column)
     return cph
+
+
+# ---------------------------------------------------------------------------
+# Monte Carlo portfolio simulation
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class MonteCarloResult:
+    """Distribution of PORTFOLIO outcomes, not of individual loans."""
+
+    default_share: np.ndarray      # (n_sims, horizon+1)
+    prepaid_share: np.ndarray
+    delinquent_share: np.ndarray
+    n_sims: int
+    n_loans: int
+    horizon: int
+    scenario: str = "base"
+
+    def percentile_frame(self, which: str = "default_share",
+                         levels=(5, 25, 50, 75, 95)) -> pd.DataFrame:
+        data = getattr(self, which)
+        rows = []
+        for h in range(self.horizon + 1):
+            row = {"month": h}
+            for level in levels:
+                row["p{}".format(level)] = float(
+                    np.percentile(data[:, h], level))
+            row["mean"] = float(data[:, h].mean())
+            rows.append(row)
+        return pd.DataFrame(rows)
+
+    def summary(self) -> str:
+        final = self.default_share[:, -1]
+        return "\n".join([
+            "simulations        : {:,}".format(self.n_sims),
+            "loans per path     : {:,}".format(self.n_loans),
+            "12m default, mean  : {:.4f}".format(final.mean()),
+            "12m default, p5-p95: {:.4f} to {:.4f}".format(
+                np.percentile(final, 5), np.percentile(final, 95)),
+        ])
+
+
+def monte_carlo_paths(
+    model: _TransitionModelBase,
+    X: pd.DataFrame,
+    from_states: pd.Series,
+    horizon: int = SURVIVAL_HORIZON_MONTHS,
+    n_sims: int = 300,
+    scenario_multipliers: dict = None,
+    scenario_name: str = "base",
+    random_state: int = RANDOM_SEED,
+) -> MonteCarloResult:
+    """Sample whole portfolio trajectories through the fitted chain.
+
+    WHAT THIS ADDS OVER THE DETERMINISTIC PROJECTION
+    ------------------------------------------------
+    Propagating the state distribution forward gives the EXPECTED
+    portfolio default rate. It says nothing about how far a realised
+    outcome could sit from that expectation, and with roughly 1,500 loans
+    that spread is not negligible: a single point estimate invites a
+    reviewer to treat 1.35% as a forecast rather than as the centre of a
+    distribution.
+
+    So this samples an actual path per loan per simulation and aggregates,
+    producing percentile bands. The mean of these paths should track the
+    deterministic curve closely -- if it does not, one of the two is
+    wrong, which makes this a check on the chain as well as an addition
+    to it.
+
+    The transition matrices are computed ONCE per horizon step and reused
+    across every simulation. They depend on the advanced covariates, not
+    on the sampled state, so recomputing them per simulation would be
+    hundreds of identical model calls.
+    """
+    states = model.states
+    S = len(states)
+    n = len(X)
+    rng = np.random.default_rng(random_state)
+    state_index = {s: i for i, s in enumerate(states)}
+
+    # Precompute one matrix stack per step: shape (horizon, n, S, S).
+    matrices = []
+    for h in range(horizon):
+        M = model.full_matrices(advance_covariates(X, h))
+        if scenario_multipliers:
+            M = apply_scenario_to_matrix(M, states, model.absorbing,
+                                         scenario_multipliers)
+        matrices.append(np.cumsum(M, axis=2))     # cumulative for sampling
+
+    start = np.array([state_index.get(s, state_index["Current"])
+                      for s in from_states.to_numpy()])
+    absorbing_idx = {state_index[s] for s in model.absorbing if s in state_index}
+    dpd_idx = [state_index[s] for s in states if s.endswith("DPD")]
+    default_idx = state_index.get("Default")
+    prepaid_idx = state_index.get("Prepaid")
+
+    default_share = np.zeros((n_sims, horizon + 1))
+    prepaid_share = np.zeros((n_sims, horizon + 1))
+    delinquent_share = np.zeros((n_sims, horizon + 1))
+
+    for sim in range(n_sims):
+        current = start.copy()
+        delinquent_share[sim, 0] = np.isin(current, dpd_idx).mean()
+        for h in range(horizon):
+            # Inverse-transform sampling against the precomputed CDF row
+            # for each loan's current state. One uniform draw per loan.
+            cdf = matrices[h][np.arange(n), current, :]
+            draws = rng.random(n)[:, None]
+            current = (draws > cdf).sum(axis=1)
+            current = np.clip(current, 0, S - 1)
+            default_share[sim, h + 1] = (
+                (current == default_idx).mean() if default_idx is not None else 0.0)
+            prepaid_share[sim, h + 1] = (
+                (current == prepaid_idx).mean() if prepaid_idx is not None else 0.0)
+            delinquent_share[sim, h + 1] = np.isin(current, dpd_idx).mean()
+
+    return MonteCarloResult(
+        default_share=default_share,
+        prepaid_share=prepaid_share,
+        delinquent_share=delinquent_share,
+        n_sims=n_sims, n_loans=n, horizon=horizon, scenario=scenario_name,
+    )

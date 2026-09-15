@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
@@ -53,7 +54,7 @@ if comparison:
     cols = [c for c in ("model", "log_loss", "macro_f1", "accuracy",
                         "auc_Current", "auc_30DPD", "auc_60DPD", "auc_90DPD")
             if c in df.columns]
-    st.dataframe(df[cols], use_container_width=True, hide_index=True)
+    st.dataframe(df[cols], width="stretch", hide_index=True)
     st.caption(
         "The covariate model gains discrimination while matching the "
         "baseline on log-loss. It gets there by credibility weighting: "
@@ -94,7 +95,7 @@ event = st.radio("Event", ["cif_default", "cif_prepaid", "delinquency_share"],
 
 fig = px.line(curves, x="month", y=event, color="scenario", markers=True)
 fig.update_layout(height=400, xaxis_title="months ahead", yaxis_title="probability")
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width="stretch")
 
 base = curves[curves.scenario == "base"]
 if len(base):
@@ -104,6 +105,50 @@ if len(base):
         "cumulative prepayment, {:.2%} still in a delinquency bucket."
         .format(final.cif_default, final.cif_prepaid, final.delinquency_share)
     )
+
+# ------------------------------------------------------ Monte Carlo
+try:
+    mc = load_csv("monte_carlo_curves.csv")
+    st.subheader("Monte Carlo portfolio simulation")
+    st.caption(
+        "The curve above is the EXPECTED portfolio default rate. It says "
+        "nothing about how far a realised outcome could sit from that "
+        "expectation. These bands come from sampling 300 whole portfolio "
+        "trajectories through the same fitted chain."
+    )
+    scenario = st.selectbox(
+        "Scenario", sorted(mc.scenario.unique()), key="mc_scenario")
+    sub = mc[mc.scenario == scenario].sort_values("month")
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=sub.month, y=sub.p95, line=dict(width=0), showlegend=False,
+        hoverinfo="skip"))
+    fig.add_trace(go.Scatter(
+        x=sub.month, y=sub.p5, line=dict(width=0), fill="tonexty",
+        fillcolor="rgba(99,150,255,0.18)", name="5th–95th percentile"))
+    fig.add_trace(go.Scatter(
+        x=sub.month, y=sub.p75, line=dict(width=0), showlegend=False,
+        hoverinfo="skip"))
+    fig.add_trace(go.Scatter(
+        x=sub.month, y=sub.p25, line=dict(width=0), fill="tonexty",
+        fillcolor="rgba(99,150,255,0.35)", name="25th–75th percentile"))
+    fig.add_trace(go.Scatter(
+        x=sub.month, y=sub["mean"], line=dict(width=2.5), name="mean"))
+    fig.update_layout(height=380, xaxis_title="months ahead",
+                      yaxis_title="cumulative default incidence")
+    st.plotly_chart(fig, width="stretch")
+
+    final = sub[sub.month == sub.month.max()].iloc[0]
+    st.caption(
+        "At 12 months the sampled mean is {:.2%}, with a 5th-to-95th "
+        "percentile band of {:.2%} to {:.2%}. The mean tracking the "
+        "deterministic curve is a check on the chain, not a coincidence — "
+        "if the two disagreed, one of them would be wrong.".format(
+            final["mean"], final["p5"], final["p95"])
+    )
+except Exception:
+    pass
 
 st.warning(
     "**A limitation of this synthetic pack, not of the model.** It contains "

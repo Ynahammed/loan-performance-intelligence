@@ -98,7 +98,7 @@ if supervised:
             "Recall @ 50% precision": best.get("recall_at_p50", "-"),
             "Champion": entry["champion"],
         })
-    st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
 
     st.warning(
         "**Known limitation.** Prepayment is close to unpredictable out of "
@@ -150,7 +150,7 @@ with st.expander("Artifact freshness"):
         "showing it is stale — this table is how you find out rather than "
         "being misled."
     )
-    st.dataframe(artifact_status(), use_container_width=True, hide_index=True)
+    st.dataframe(artifact_status(), width="stretch", hide_index=True)
 
 st.sidebar.title("Navigation")
 st.sidebar.caption(

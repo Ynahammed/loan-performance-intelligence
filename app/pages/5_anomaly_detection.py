@@ -56,7 +56,7 @@ st.success(
 st.subheader("How each record was decided")
 mix = exceptions.decided_by.value_counts().rename("records").to_frame()
 mix["share"] = (100 * mix.records / len(exceptions)).round(2)
-st.dataframe(mix, use_container_width=True)
+st.dataframe(mix, width="stretch")
 st.caption(
     "`decided_by` travels with every record so a reviewer never has to "
     "guess whether they are looking at a rule citation or a model score. "
@@ -69,7 +69,7 @@ st.subheader("Anomaly score distribution")
 fig = px.histogram(exceptions, x="anomaly_score", nbins=60)
 fig.update_layout(height=300, xaxis_title="anomaly score (0–1)",
                   yaxis_title="records")
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width="stretch")
 
 # ------------------------------------------------- reviewer examples
 require("reviewer_examples.csv")

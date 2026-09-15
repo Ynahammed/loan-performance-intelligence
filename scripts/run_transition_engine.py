@@ -56,6 +56,7 @@ from src.models.survival import (  # noqa: E402
     empirical_transition_counts,
     evaluate_horizon_against_label,
     evaluate_one_step,
+    monte_carlo_paths,
     simulate_paths,
 )
 from src.models.validation import time_aware_split  # noqa: E402
@@ -383,6 +384,51 @@ def main() -> None:
         emit("```")
         emit(top.to_string())
         emit("```")
+
+    # ------------------------------------------------ Monte Carlo
+    section("10b. Monte Carlo portfolio simulation")
+    mc_frames = []
+    for _, row in macro.iterrows():
+        name = row["scenario_name"]
+        mc = monte_carlo_paths(
+            model, active, active[STATE_COLUMN], horizon=HORIZON, n_sims=300,
+            scenario_multipliers=None if name == "base" else row.to_dict(),
+            scenario_name=name,
+        )
+        if name == "base":
+            print(mc.summary())
+            emit()
+            emit("### Monte Carlo portfolio simulation")
+            emit()
+            emit("The deterministic chain gives the EXPECTED portfolio "
+                 "default rate. It says nothing about how far a realised "
+                 "outcome could sit from that expectation, and with {:,} "
+                 "loans that spread is not negligible. Sampling whole "
+                 "trajectories gives the distribution.".format(len(active)))
+            emit()
+            emit("```")
+            emit(mc.summary())
+            emit("```")
+        mc_frames.append(
+            mc.percentile_frame("default_share").assign(scenario=name))
+
+    mc_all = pd.concat(mc_frames, ignore_index=True)
+    mc_all.to_csv(DERIVED_DIR / "monte_carlo_curves.csv", index=False)
+
+    base_mc = mc_all[mc_all.scenario == "base"]
+    final_mc = base_mc[base_mc.month == base_mc.month.max()].iloc[0]
+    deterministic = float(base_default[-1])
+    emit()
+    emit("At 12 months the sampled mean is {:.4f} against the "
+         "deterministic curve's {:.4f}. Those should agree closely -- if "
+         "they did not, one of the two would be wrong, so this doubles as "
+         "a check on the chain rather than only an addition to it. The "
+         "5th-to-95th percentile band spans {:.4f} to {:.4f}.".format(
+             final_mc["mean"], deterministic, final_mc["p5"], final_mc["p95"]))
+    print("sampled mean {:.4f} vs deterministic {:.4f}".format(
+        final_mc["mean"], deterministic))
+    print("p5-p95: {:.4f} to {:.4f}".format(final_mc["p5"], final_mc["p95"]))
+
 
     # ---------------------------------------------------------- persist
     section("11. Persist")

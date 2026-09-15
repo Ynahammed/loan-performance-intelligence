@@ -1,4 +1,720 @@
 {
+  "intervals": {
+    "next_3m_delinquency_flag": {
+      "n_boot_usable": 400,
+      "n_clusters": 1498,
+      "roc_auc_point": 0.7011,
+      "roc_auc_lo": 0.6674,
+      "roc_auc_hi": 0.7371,
+      "pr_auc_point": 0.4114,
+      "pr_auc_lo": 0.3459,
+      "pr_auc_hi": 0.4675
+    },
+    "next_6m_delinquency_flag": {
+      "n_boot_usable": 400,
+      "n_clusters": 1429,
+      "roc_auc_point": 0.6257,
+      "roc_auc_lo": 0.5883,
+      "roc_auc_hi": 0.6634,
+      "pr_auc_point": 0.299,
+      "pr_auc_lo": 0.2408,
+      "pr_auc_hi": 0.3559
+    },
+    "next_12m_default_flag": {
+      "n_boot_usable": 400,
+      "n_clusters": 1299,
+      "roc_auc_point": 0.8598,
+      "roc_auc_lo": 0.7722,
+      "roc_auc_hi": 0.9244,
+      "pr_auc_point": 0.1639,
+      "pr_auc_lo": 0.0327,
+      "pr_auc_hi": 0.3322
+    },
+    "next_12m_prepayment_flag": {
+      "n_boot_usable": 400,
+      "n_clusters": 1299,
+      "roc_auc_point": 0.5779,
+      "roc_auc_lo": 0.5329,
+      "roc_auc_hi": 0.6229,
+      "pr_auc_point": 0.1348,
+      "pr_auc_lo": 0.1046,
+      "pr_auc_hi": 0.1757
+    }
+  },
+  "slices": {
+    "next_3m_delinquency_flag": {
+      "credit_score_band": [
+        {
+          "segment": "620-659",
+          "n": 1542,
+          "observed_rate": 0.0869,
+          "mean_prediction": 0.06177,
+          "selection_rate": 0.07652,
+          "roc_auc": 0.6801,
+          "pr_auc_lift": 5.17
+        },
+        {
+          "segment": "<620",
+          "n": 768,
+          "observed_rate": 0.07943,
+          "mean_prediction": 0.06131,
+          "selection_rate": 0.0625,
+          "roc_auc": 0.7502,
+          "pr_auc_lift": 6.33
+        },
+        {
+          "segment": "660-699",
+          "n": 2453,
+          "observed_rate": 0.0583,
+          "mean_prediction": 0.04361,
+          "selection_rate": 0.04158,
+          "roc_auc": 0.7394,
+          "pr_auc_lift": 6.23
+        },
+        {
+          "segment": "700-739",
+          "n": 4009,
+          "observed_rate": 0.05388,
+          "mean_prediction": 0.04893,
+          "selection_rate": 0.0464,
+          "roc_auc": 0.7185,
+          "pr_auc_lift": 8.84
+        },
+        {
+          "segment": "740-779",
+          "n": 3509,
+          "observed_rate": 0.05301,
+          "mean_prediction": 0.04877,
+          "selection_rate": 0.05928,
+          "roc_auc": 0.6734,
+          "pr_auc_lift": 7.3
+        },
+        {
+          "segment": "780+",
+          "n": 2904,
+          "observed_rate": 0.04098,
+          "mean_prediction": 0.03836,
+          "selection_rate": 0.03409,
+          "roc_auc": 0.6394,
+          "pr_auc_lift": 7.87
+        }
+      ],
+      "state": [
+        {
+          "segment": "AZ",
+          "n": 1135,
+          "observed_rate": 0.07137,
+          "mean_prediction": 0.05917,
+          "selection_rate": 0.06256,
+          "roc_auc": 0.7591,
+          "pr_auc_lift": 7.8
+        },
+        {
+          "segment": "NY",
+          "n": 1393,
+          "observed_rate": 0.06748,
+          "mean_prediction": 0.04493,
+          "selection_rate": 0.03518,
+          "roc_auc": 0.6115,
+          "pr_auc_lift": 5.36
+        },
+        {
+          "segment": "FL",
+          "n": 1710,
+          "observed_rate": 0.06667,
+          "mean_prediction": 0.04475,
+          "selection_rate": 0.04211,
+          "roc_auc": 0.7056,
+          "pr_auc_lift": 5.1
+        },
+        {
+          "segment": "CA",
+          "n": 2365,
+          "observed_rate": 0.05751,
+          "mean_prediction": 0.04468,
+          "selection_rate": 0.0389,
+          "roc_auc": 0.704,
+          "pr_auc_lift": 7.84
+        },
+        {
+          "segment": "OH",
+          "n": 975,
+          "observed_rate": 0.05641,
+          "mean_prediction": 0.04785,
+          "selection_rate": 0.04,
+          "roc_auc": 0.6485,
+          "pr_auc_lift": 7.59
+        },
+        {
+          "segment": "NC",
+          "n": 767,
+          "observed_rate": 0.05606,
+          "mean_prediction": 0.0457,
+          "selection_rate": 0.04563,
+          "roc_auc": 0.7706,
+          "pr_auc_lift": 7.17
+        },
+        {
+          "segment": "GA",
+          "n": 1096,
+          "observed_rate": 0.05566,
+          "mean_prediction": 0.05386,
+          "selection_rate": 0.05201,
+          "roc_auc": 0.7491,
+          "pr_auc_lift": 10.4
+        },
+        {
+          "segment": "IL",
+          "n": 1290,
+          "observed_rate": 0.05194,
+          "mean_prediction": 0.04664,
+          "selection_rate": 0.05581,
+          "roc_auc": 0.6745,
+          "pr_auc_lift": 4.42
+        },
+        {
+          "segment": "PA",
+          "n": 886,
+          "observed_rate": 0.05192,
+          "mean_prediction": 0.04977,
+          "selection_rate": 0.04515,
+          "roc_auc": 0.7613,
+          "pr_auc_lift": 9.2
+        },
+        {
+          "segment": "TX",
+          "n": 1940,
+          "observed_rate": 0.05103,
+          "mean_prediction": 0.0589,
+          "selection_rate": 0.09794,
+          "roc_auc": 0.7289,
+          "pr_auc_lift": 7.49
+        },
+        {
+          "segment": "MI",
+          "n": 724,
+          "observed_rate": 0.04558,
+          "mean_prediction": 0.04651,
+          "selection_rate": 0.04558,
+          "roc_auc": 0.6352,
+          "pr_auc_lift": 8.49
+        },
+        {
+          "segment": "WA",
+          "n": 904,
+          "observed_rate": 0.03319,
+          "mean_prediction": 0.02559,
+          "selection_rate": 0.01217,
+          "roc_auc": 0.6782,
+          "pr_auc_lift": 8.35
+        }
+      ]
+    },
+    "next_6m_delinquency_flag": {
+      "credit_score_band": [
+        {
+          "segment": "620-659",
+          "n": 1355,
+          "observed_rate": 0.13284,
+          "mean_prediction": 0.07528,
+          "selection_rate": 0.08266,
+          "roc_auc": 0.5498,
+          "pr_auc_lift": 2.2
+        },
+        {
+          "segment": "<620",
+          "n": 680,
+          "observed_rate": 0.13088,
+          "mean_prediction": 0.09898,
+          "selection_rate": 0.15882,
+          "roc_auc": 0.5881,
+          "pr_auc_lift": 3.31
+        },
+        {
+          "segment": "660-699",
+          "n": 2132,
+          "observed_rate": 0.08818,
+          "mean_prediction": 0.05876,
+          "selection_rate": 0.04221,
+          "roc_auc": 0.5794,
+          "pr_auc_lift": 2.07
+        },
+        {
+          "segment": "740-779",
+          "n": 3096,
+          "observed_rate": 0.08107,
+          "mean_prediction": 0.05733,
+          "selection_rate": 0.03585,
+          "roc_auc": 0.6324,
+          "pr_auc_lift": 3.46
+        },
+        {
+          "segment": "700-739",
+          "n": 3524,
+          "observed_rate": 0.07633,
+          "mean_prediction": 0.06218,
+          "selection_rate": 0.04342,
+          "roc_auc": 0.6915,
+          "pr_auc_lift": 5.09
+        },
+        {
+          "segment": "780+",
+          "n": 2550,
+          "observed_rate": 0.06314,
+          "mean_prediction": 0.05072,
+          "selection_rate": 0.03647,
+          "roc_auc": 0.6014,
+          "pr_auc_lift": 4.13
+        }
+      ],
+      "state": [
+        {
+          "segment": "FL",
+          "n": 1507,
+          "observed_rate": 0.10816,
+          "mean_prediction": 0.05249,
+          "selection_rate": 0.03318,
+          "roc_auc": 0.6423,
+          "pr_auc_lift": 2.47
+        },
+        {
+          "segment": "NY",
+          "n": 1210,
+          "observed_rate": 0.10165,
+          "mean_prediction": 0.06132,
+          "selection_rate": 0.04545,
+          "roc_auc": 0.552,
+          "pr_auc_lift": 2.68
+        },
+        {
+          "segment": "AZ",
+          "n": 1004,
+          "observed_rate": 0.1006,
+          "mean_prediction": 0.07119,
+          "selection_rate": 0.09263,
+          "roc_auc": 0.6988,
+          "pr_auc_lift": 4.55
+        },
+        {
+          "segment": "NC",
+          "n": 681,
+          "observed_rate": 0.09692,
+          "mean_prediction": 0.06794,
+          "selection_rate": 0.07342,
+          "roc_auc": 0.5587,
+          "pr_auc_lift": 3.25
+        },
+        {
+          "segment": "CA",
+          "n": 2077,
+          "observed_rate": 0.0857,
+          "mean_prediction": 0.06182,
+          "selection_rate": 0.03948,
+          "roc_auc": 0.6287,
+          "pr_auc_lift": 3.68
+        },
+        {
+          "segment": "IL",
+          "n": 1122,
+          "observed_rate": 0.08467,
+          "mean_prediction": 0.05982,
+          "selection_rate": 0.05882,
+          "roc_auc": 0.5271,
+          "pr_auc_lift": 1.45
+        },
+        {
+          "segment": "PA",
+          "n": 770,
+          "observed_rate": 0.08442,
+          "mean_prediction": 0.06411,
+          "selection_rate": 0.05195,
+          "roc_auc": 0.6223,
+          "pr_auc_lift": 4.07
+        },
+        {
+          "segment": "TX",
+          "n": 1726,
+          "observed_rate": 0.07648,
+          "mean_prediction": 0.06981,
+          "selection_rate": 0.05736,
+          "roc_auc": 0.652,
+          "pr_auc_lift": 4.2
+        },
+        {
+          "segment": "OH",
+          "n": 855,
+          "observed_rate": 0.07602,
+          "mean_prediction": 0.05575,
+          "selection_rate": 0.04444,
+          "roc_auc": 0.5867,
+          "pr_auc_lift": 3.43
+        },
+        {
+          "segment": "GA",
+          "n": 970,
+          "observed_rate": 0.07216,
+          "mean_prediction": 0.07071,
+          "selection_rate": 0.07216,
+          "roc_auc": 0.7903,
+          "pr_auc_lift": 6.34
+        },
+        {
+          "segment": "MI",
+          "n": 627,
+          "observed_rate": 0.06858,
+          "mean_prediction": 0.04913,
+          "selection_rate": 0.02233,
+          "roc_auc": 0.5731,
+          "pr_auc_lift": 3.9
+        },
+        {
+          "segment": "WA",
+          "n": 788,
+          "observed_rate": 0.04695,
+          "mean_prediction": 0.04705,
+          "selection_rate": 0.01269,
+          "roc_auc": 0.7374,
+          "pr_auc_lift": 4.53
+        }
+      ]
+    },
+    "next_12m_default_flag": {
+      "credit_score_band": [
+        {
+          "segment": "<620",
+          "n": 562,
+          "observed_rate": 0.0427,
+          "mean_prediction": 0.01208,
+          "selection_rate": 0.2669,
+          "roc_auc": 0.7943,
+          "pr_auc_lift": 4.93
+        },
+        {
+          "segment": "700-739",
+          "n": 2929,
+          "observed_rate": 0.01229,
+          "mean_prediction": 0.00324,
+          "selection_rate": 0.02731,
+          "roc_auc": 0.8784,
+          "pr_auc_lift": 28.11
+        },
+        {
+          "segment": "620-659",
+          "n": 1109,
+          "observed_rate": 0.01172,
+          "mean_prediction": 0.00642,
+          "selection_rate": 0.14698,
+          "roc_auc": 0.8553,
+          "pr_auc_lift": 22.07
+        },
+        {
+          "segment": "740-779",
+          "n": 2579,
+          "observed_rate": 0.00582,
+          "mean_prediction": 0.00259,
+          "selection_rate": 0.01396,
+          "roc_auc": 0.8126,
+          "pr_auc_lift": 4.89
+        },
+        {
+          "segment": "780+",
+          "n": 2048,
+          "observed_rate": 0.00195,
+          "mean_prediction": 0.00233,
+          "selection_rate": 0.01562,
+          "roc_auc": 0.7145,
+          "pr_auc_lift": 2.29
+        },
+        {
+          "segment": "660-699",
+          "n": 1765,
+          "observed_rate": 0.0017,
+          "mean_prediction": 0.00383,
+          "selection_rate": 0.05042,
+          "roc_auc": 0.9005,
+          "pr_auc_lift": 9.64
+        }
+      ],
+      "state": [
+        {
+          "segment": "AZ",
+          "n": 794,
+          "observed_rate": 0.02267,
+          "mean_prediction": 0.00397,
+          "selection_rate": 0.06045,
+          "roc_auc": 0.9456,
+          "pr_auc_lift": 29.13
+        },
+        {
+          "segment": "PA",
+          "n": 636,
+          "observed_rate": 0.02044,
+          "mean_prediction": 0.00568,
+          "selection_rate": 0.13208,
+          "roc_auc": 0.881,
+          "pr_auc_lift": 20.27
+        },
+        {
+          "segment": "GA",
+          "n": 816,
+          "observed_rate": 0.01961,
+          "mean_prediction": 0.00308,
+          "selection_rate": 0.03309,
+          "roc_auc": 0.7829,
+          "pr_auc_lift": 13.81
+        },
+        {
+          "segment": "TX",
+          "n": 1472,
+          "observed_rate": 0.01427,
+          "mean_prediction": 0.00502,
+          "selection_rate": 0.09035,
+          "roc_auc": 0.8587,
+          "pr_auc_lift": 28.25
+        },
+        {
+          "segment": "NY",
+          "n": 996,
+          "observed_rate": 0.01205,
+          "mean_prediction": 0.00307,
+          "selection_rate": 0.0251,
+          "roc_auc": 0.7291,
+          "pr_auc_lift": 2.79
+        },
+        {
+          "segment": "CA",
+          "n": 1717,
+          "observed_rate": 0.00582,
+          "mean_prediction": 0.00269,
+          "selection_rate": 0.02271,
+          "roc_auc": 0.9182,
+          "pr_auc_lift": 11.02
+        },
+        {
+          "segment": "FL",
+          "n": 1221,
+          "observed_rate": 0.00328,
+          "mean_prediction": 0.00489,
+          "selection_rate": 0.07125,
+          "roc_auc": 0.8959,
+          "pr_auc_lift": 6.61
+        },
+        {
+          "segment": "OH",
+          "n": 692,
+          "observed_rate": 0.00145,
+          "mean_prediction": 0.0041,
+          "selection_rate": 0.02601,
+          "roc_auc": 0.9986,
+          "pr_auc_lift": 346.0
+        },
+        {
+          "segment": "NC",
+          "n": 582,
+          "observed_rate": 0.0,
+          "mean_prediction": 0.00322,
+          "selection_rate": 0.03608,
+          "roc_auc": NaN,
+          "pr_auc_lift": NaN
+        },
+        {
+          "segment": "MI",
+          "n": 495,
+          "observed_rate": 0.0,
+          "mean_prediction": 0.00309,
+          "selection_rate": 0.0303,
+          "roc_auc": NaN,
+          "pr_auc_lift": NaN
+        },
+        {
+          "segment": "IL",
+          "n": 919,
+          "observed_rate": 0.0,
+          "mean_prediction": 0.00305,
+          "selection_rate": 0.03047,
+          "roc_auc": NaN,
+          "pr_auc_lift": NaN
+        },
+        {
+          "segment": "WA",
+          "n": 652,
+          "observed_rate": 0.0,
+          "mean_prediction": 0.00345,
+          "selection_rate": 0.03834,
+          "roc_auc": NaN,
+          "pr_auc_lift": NaN
+        }
+      ]
+    },
+    "next_12m_prepayment_flag": {
+      "credit_score_band": [
+        {
+          "segment": "<620",
+          "n": 562,
+          "observed_rate": 0.17616,
+          "mean_prediction": 0.24125,
+          "selection_rate": 0.53559,
+          "roc_auc": 0.5997,
+          "pr_auc_lift": 1.16
+        },
+        {
+          "segment": "620-659",
+          "n": 1109,
+          "observed_rate": 0.12083,
+          "mean_prediction": 0.1498,
+          "selection_rate": 0.1073,
+          "roc_auc": 0.675,
+          "pr_auc_lift": 1.76
+        },
+        {
+          "segment": "660-699",
+          "n": 1765,
+          "observed_rate": 0.09292,
+          "mean_prediction": 0.12547,
+          "selection_rate": 0.03229,
+          "roc_auc": 0.5606,
+          "pr_auc_lift": 1.8
+        },
+        {
+          "segment": "780+",
+          "n": 2048,
+          "observed_rate": 0.0874,
+          "mean_prediction": 0.1,
+          "selection_rate": 0.0083,
+          "roc_auc": 0.5699,
+          "pr_auc_lift": 1.56
+        },
+        {
+          "segment": "740-779",
+          "n": 2579,
+          "observed_rate": 0.08724,
+          "mean_prediction": 0.11343,
+          "selection_rate": 0.00504,
+          "roc_auc": 0.4774,
+          "pr_auc_lift": 1.02
+        },
+        {
+          "segment": "700-739",
+          "n": 2929,
+          "observed_rate": 0.06897,
+          "mean_prediction": 0.12302,
+          "selection_rate": 0.01468,
+          "roc_auc": 0.5417,
+          "pr_auc_lift": 1.03
+        }
+      ],
+      "state": [
+        {
+          "segment": "NC",
+          "n": 582,
+          "observed_rate": 0.11856,
+          "mean_prediction": 0.15127,
+          "selection_rate": 0.04296,
+          "roc_auc": 0.446,
+          "pr_auc_lift": 1.31
+        },
+        {
+          "segment": "TX",
+          "n": 1472,
+          "observed_rate": 0.11481,
+          "mean_prediction": 0.11963,
+          "selection_rate": 0.05027,
+          "roc_auc": 0.615,
+          "pr_auc_lift": 1.45
+        },
+        {
+          "segment": "FL",
+          "n": 1221,
+          "observed_rate": 0.10893,
+          "mean_prediction": 0.11011,
+          "selection_rate": 0.03849,
+          "roc_auc": 0.5788,
+          "pr_auc_lift": 1.8
+        },
+        {
+          "segment": "GA",
+          "n": 816,
+          "observed_rate": 0.10417,
+          "mean_prediction": 0.13648,
+          "selection_rate": 0.04902,
+          "roc_auc": 0.5556,
+          "pr_auc_lift": 1.52
+        },
+        {
+          "segment": "PA",
+          "n": 636,
+          "observed_rate": 0.09591,
+          "mean_prediction": 0.12618,
+          "selection_rate": 0.05031,
+          "roc_auc": 0.5361,
+          "pr_auc_lift": 1.77
+        },
+        {
+          "segment": "NY",
+          "n": 996,
+          "observed_rate": 0.09538,
+          "mean_prediction": 0.12486,
+          "selection_rate": 0.03514,
+          "roc_auc": 0.4853,
+          "pr_auc_lift": 1.21
+        },
+        {
+          "segment": "MI",
+          "n": 495,
+          "observed_rate": 0.09495,
+          "mean_prediction": 0.15639,
+          "selection_rate": 0.14141,
+          "roc_auc": 0.5915,
+          "pr_auc_lift": 1.66
+        },
+        {
+          "segment": "CA",
+          "n": 1717,
+          "observed_rate": 0.0827,
+          "mean_prediction": 0.12753,
+          "selection_rate": 0.04368,
+          "roc_auc": 0.6201,
+          "pr_auc_lift": 1.76
+        },
+        {
+          "segment": "WA",
+          "n": 652,
+          "observed_rate": 0.07209,
+          "mean_prediction": 0.13417,
+          "selection_rate": 0.08129,
+          "roc_auc": 0.5946,
+          "pr_auc_lift": 2.57
+        },
+        {
+          "segment": "IL",
+          "n": 919,
+          "observed_rate": 0.06638,
+          "mean_prediction": 0.09487,
+          "selection_rate": 0.0,
+          "roc_auc": 0.4928,
+          "pr_auc_lift": 1.77
+        },
+        {
+          "segment": "OH",
+          "n": 692,
+          "observed_rate": 0.06358,
+          "mean_prediction": 0.13453,
+          "selection_rate": 0.09104,
+          "roc_auc": 0.6584,
+          "pr_auc_lift": 2.39
+        },
+        {
+          "segment": "AZ",
+          "n": 794,
+          "observed_rate": 0.06297,
+          "mean_prediction": 0.12861,
+          "selection_rate": 0.04534,
+          "roc_auc": 0.6927,
+          "pr_auc_lift": 1.72
+        }
+      ]
+    }
+  },
   "next_3m_delinquency_flag": {
     "champion": "improved (gradient boosting, engineered)",
     "metrics": [
@@ -267,5 +983,67 @@
         "log_loss": 0.19643
       }
     ]
-  }
+  },
+  "predictability_ceiling": [
+    {
+      "target": "next_3m_delinquency_flag",
+      "horizon_months": 3,
+      "temporal_roc_auc": 0.715,
+      "temporal_pr_auc": 0.3929,
+      "temporal_lift": 6.945,
+      "temporal_prevalence": 0.05657,
+      "temporal_n_test": 15185,
+      "random_roc_auc": 0.7629,
+      "random_pr_auc": 0.4626,
+      "random_lift": 10.112,
+      "random_prevalence": 0.04575,
+      "random_n_test": 10864,
+      "share_lost_to_time": 0.3132
+    },
+    {
+      "target": "next_6m_delinquency_flag",
+      "horizon_months": 6,
+      "temporal_roc_auc": 0.6579,
+      "temporal_pr_auc": 0.296,
+      "temporal_lift": 3.47,
+      "temporal_prevalence": 0.08533,
+      "temporal_n_test": 13337,
+      "random_roc_auc": 0.6481,
+      "random_pr_auc": 0.2247,
+      "random_lift": 3.768,
+      "random_prevalence": 0.05963,
+      "random_n_test": 9877,
+      "share_lost_to_time": 0.0791
+    },
+    {
+      "target": "next_12m_default_flag",
+      "horizon_months": 12,
+      "temporal_roc_auc": 0.6096,
+      "temporal_pr_auc": 0.0261,
+      "temporal_lift": 3.023,
+      "temporal_prevalence": 0.00864,
+      "temporal_n_test": 10992,
+      "random_roc_auc": 0.8483,
+      "random_pr_auc": 0.2742,
+      "random_lift": 42.463,
+      "random_prevalence": 0.00646,
+      "random_n_test": 8207,
+      "share_lost_to_time": 0.9288
+    },
+    {
+      "target": "next_12m_prepayment_flag",
+      "horizon_months": 12,
+      "temporal_roc_auc": 0.5313,
+      "temporal_pr_auc": 0.102,
+      "temporal_lift": 1.117,
+      "temporal_prevalence": 0.09125,
+      "temporal_n_test": 10992,
+      "random_roc_auc": 0.6261,
+      "random_pr_auc": 0.1893,
+      "random_lift": 1.782,
+      "random_prevalence": 0.10625,
+      "random_n_test": 8207,
+      "share_lost_to_time": 0.3732
+    }
+  ]
 }

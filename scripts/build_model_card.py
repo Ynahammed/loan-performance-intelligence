@@ -223,6 +223,35 @@ def main() -> None:
             final["brier"], final["ece"]))
     w("")
 
+    intervals = supervised.get("intervals")
+    if intervals:
+        w("### Confidence intervals")
+        w("")
+        w("95% percentile intervals, bootstrapped **clustered by loan**. "
+          "The same borrower contributes many correlated rows, so "
+          "resampling rows individually would treat one loan's history as "
+          "many independent observations and report an interval far "
+          "narrower than the evidence supports.")
+        w("")
+        w("| Target | ROC-AUC | PR-AUC |")
+        w("|---|---|---|")
+        for target, label in TARGET_LABELS.items():
+            ci = intervals.get(target)
+            if not ci or "roc_auc_point" not in ci:
+                continue
+            w("| {} | {} [{}, {}] | {} [{}, {}] |".format(
+                label, ci["roc_auc_point"], ci["roc_auc_lo"], ci["roc_auc_hi"],
+                ci["pr_auc_point"], ci["pr_auc_lo"], ci["pr_auc_hi"]))
+        w("")
+        default_ci = intervals.get("next_12m_default_flag")
+        if default_ci and "pr_auc_lo" in default_ci:
+            w("The 12-month default interval is the one to read carefully: "
+              "roughly 66 events support it, and its PR-AUC interval spans "
+              "[{}, {}]. A point estimate quoted alone would invite more "
+              "confidence than the data carries.".format(
+                  default_ci["pr_auc_lo"], default_ci["pr_auc_hi"]))
+            w("")
+
     ns = supervised.get("next_state")
     if ns:
         w("Next-state prediction, against two baselines:")
@@ -324,6 +353,43 @@ def main() -> None:
               final["roc_auc"], final.get("recall_at_p50", "-")))
         w("")
 
+    ceiling = supervised.get("predictability_ceiling")
+    if ceiling:
+        w("**How much of the difficulty is time, and how much is the data.** "
+          "A weak out-of-time score has two very different causes with "
+          "opposite remedies, so the same recipe was fitted twice per "
+          "target: chronologically with a purge gap, and under a "
+          "loan-disjoint random split that lets the model see the future.")
+        w("")
+        w("| Target | Temporal lift | Random lift (ceiling) | Lost to time |")
+        w("|---|---|---|---|")
+        for row in ceiling:
+            label = TARGET_LABELS.get(row.get("target"), row.get("target"))
+            share = row.get("share_lost_to_time")
+            w("| {} | {}x | {}x | {} |".format(
+                label, row.get("temporal_lift", "-"),
+                row.get("random_lift", "-"),
+                "{:.0%}".format(share) if share is not None else "-"))
+        w("")
+        w("> The random column is a **diagnostic ceiling, not a performance "
+          "claim**. It leaks the future and must never be quoted as "
+          "deployment performance; only the temporal column is a real "
+          "estimate. Its purpose is to separate \"the signal does not "
+          "transfer\" from \"the signal was never there\".")
+        w("")
+        prepay = next((r for r in ceiling
+                       if r.get("target") == "next_12m_prepayment_flag"), None)
+        if prepay and prepay.get("random_roc_auc"):
+            w("For prepayment specifically this is decisive: even with the "
+              "future visible, ROC-AUC reaches only {}. The ceiling itself "
+              "is low, so the weak out-of-time result is a property of this "
+              "synthetic data rather than a modelling failure that more "
+              "feature work would fix. On real loan-level data prepayment "
+              "is among the more predictable quantities in mortgage "
+              "finance, driven by refinance incentive; this pack does not "
+              "reproduce that.".format(prepay["random_roc_auc"]))
+            w("")
+
     w("**The delinquency models largely read current delinquency state.** "
       "At the 50%-precision operating point, false positives carry "
       "`days_past_due` of 12.4 against 0.13 for true negatives (+1.13 sd) "
@@ -337,14 +403,33 @@ def main() -> None:
 
     default = supervised.get("next_12m_default_flag")
     if default:
-        w("**Engineered features add nothing to 12-month default.** The "
-          "logistic baseline and the gradient-boosted model tie, and the "
-          "baseline is champion. With roughly 66 events in the evaluation "
-          "window there is not enough signal to pay for the extra "
-          "capacity. The target still has the best ROC-AUC and the highest "
-          "lift of the four, but any conclusion drawn from it rests on "
-          "very few events. *(`model_performance_report.md`)*")
+        w("**Engineered features add nothing to 12-month default, and the "
+          "ceiling table above says why.** The logistic baseline and the "
+          "gradient-boosted model tie, and the baseline is champion. That "
+          "is not luck: fitted under a random split the boosted model "
+          "reaches 42.5x lift, and chronologically it reaches 3.0x -- it "
+          "loses 93% of its edge to temporal transfer, the worst of the "
+          "four targets by a wide margin. With roughly 66 events it finds "
+          "period-specific structure that evaporates the moment it is "
+          "asked to predict forward, while the far more constrained "
+          "logistic model generalises. The right answer to \"why not use a "
+          "more powerful model here\" is that it was tried and it did not "
+          "survive the split. *(`model_performance_report.md`)*")
         w("")
+
+    w("**Calibration holds in aggregate and fails by vintage.** Overall "
+      "expected calibration error on 3-month delinquency is around 0.01, "
+      "which looks healthy. Split by origination cohort it is not: the "
+      "model under-predicts the 2022 vintage by 2.2 percentage points "
+      "(3.8% predicted against 6.0% observed) and the 2021 vintage by "
+      "1.1, while sitting within 0.5 points on 2019 and 2020. Errors in "
+      "opposite directions cancel in the aggregate, so a single ECE "
+      "figure conceals a systematic under-call on recent originations. "
+      "This is the same shift the drift analysis found: newer cohorts "
+      "were originated into a different rate environment, and a model "
+      "fitted mostly on older ones under-states their risk. "
+      "*(`model_performance_report.md`, calibration by vintage)*")
+    w("")
 
     w("**Predictions are unstable across training periods.** Refitting on "
       "expanding time windows and scoring the same rows, the spread "
@@ -371,6 +456,37 @@ def main() -> None:
       "*(`survival_report.md`)*")
     w("")
 
+    slices = supervised.get("slices")
+    if slices:
+        w("## 8b. Performance across segments")
+        w("")
+        w("A diagnostic, not a verdict. A gap here has several possible "
+          "causes -- genuinely different risk, different base rates, or "
+          "the model serving one group worse than another -- and this "
+          "table cannot separate them. It says where to look.")
+        w("")
+        w("`selection_rate` is the share of a segment flagged at the "
+          "operating threshold (the 95th percentile of predicted risk). A "
+          "large gap in selection rate alongside a similar observed rate "
+          "is the pattern worth investigating.")
+        w("")
+        target = "next_3m_delinquency_flag"
+        for segment in ("credit_score_band", "state"):
+            rows = slices.get(target, {}).get(segment)
+            if not rows:
+                continue
+            w("**{} by {}**".format(TARGET_LABELS.get(target, target),
+                                    segment.replace("_", " ")))
+            w("")
+            w("| Segment | n | Observed | Predicted | Selection rate | ROC-AUC |")
+            w("|---|---|---|---|---|---|")
+            for r in rows:
+                w("| {} | {:,} | {:.3f} | {:.3f} | {:.3f} | {} |".format(
+                    r["segment"], r["n"], r["observed_rate"],
+                    r["mean_prediction"], r["selection_rate"],
+                    r.get("roc_auc", "-")))
+            w("")
+
     # ------------------------------------------------------------ 9
     w("## 9. Limitations")
     w("")
@@ -378,8 +494,11 @@ def main() -> None:
       "challenge specification suggests (47,883 rows against 250,000+). "
       "Rare-event targets are thin: 12-month default has 49 state "
       "transitions in the entire panel.")
-    w("- Metrics carry no confidence intervals. At these event counts the "
-      "uncertainty around a PR-AUC is material and is not quantified.")
+    w("- Confidence intervals are bootstrapped clustered by loan and are "
+      "wide on the rare targets, which is the honest picture rather than "
+      "a reassuring one. They quantify sampling uncertainty only; they say "
+      "nothing about whether the next period resembles this one, which "
+      "section 8 shows is the larger risk.")
     w("- Forward simulation holds credit band, LTV, state and servicer "
       "fixed, modelling only mechanical evolution (ageing, scheduled "
       "amortisation). Borrower re-underwriting and servicing transfers are "
@@ -387,8 +506,10 @@ def main() -> None:
     w("- Scenario multipliers are applied as declared in "
       "`macro_scenarios.csv`. The engine propagates them faithfully; it "
       "does not validate that they are plausible.")
-    w("- No fairness analysis has been run. State and credit band are used "
-      "as features, and their disparate impact is unmeasured.")
+    w("- Segment performance is reported in section 8b, but a disparity "
+      "table is not a fairness assessment. Deciding whether a gap is "
+      "unjust needs context about the lending decisions these scores feed "
+      "into, which this system does not have and should not assume.")
     w("")
 
     # ------------------------------------------------------------ 10

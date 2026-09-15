@@ -61,7 +61,7 @@ fig = px.histogram(sub, x=target, nbins=60)
 fig.add_vline(x=low, line_dash="dash", annotation_text="Low/Med")
 fig.add_vline(x=high, line_dash="dash", annotation_text="Med/High")
 fig.update_layout(height=340, xaxis_title=TARGETS[target], yaxis_title="records")
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width="stretch")
 
 if scores.max() < high:
     st.info(
@@ -83,7 +83,7 @@ agg = (sub.groupby(segment)[target]
        .agg(records="size", mean_probability="mean")
        .reset_index().sort_values("mean_probability", ascending=False))
 agg["mean_probability"] = agg["mean_probability"].round(5)
-st.dataframe(agg, use_container_width=True, hide_index=True)
+st.dataframe(agg, width="stretch", hide_index=True)
 
 # ------------------------------------------------------- action queue
 st.subheader("Review queue")
@@ -93,11 +93,11 @@ st.caption(
 )
 actions = sub.recommended_action.value_counts().rename("records").to_frame()
 actions["share"] = (100 * actions.records / len(sub)).round(2)
-st.dataframe(actions, use_container_width=True)
+st.dataframe(actions, width="stretch")
 
 st.subheader("Highest-scoring records")
 show = [c for c in ("loan_id", "reporting_month", target, "next_state_pred",
                     "exception_type_pred", "anomaly_score",
                     "model_confidence", "recommended_action") if c in sub.columns]
 st.dataframe(sub.nlargest(25, target)[show],
-             use_container_width=True, hide_index=True)
+             width="stretch", hide_index=True)

@@ -22,6 +22,7 @@ import sys
 from pathlib import Path
 
 import joblib
+import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -33,8 +34,15 @@ from src.data.loader import attach_static_attributes, load_data_pack, sort_panel
 from src.data.profiler import record_quality_scores  # noqa: E402
 from src.data.reconciliation import reconcile  # noqa: E402
 from src.features.engineering import engineer_features  # noqa: E402
+from src.models.validation import (  # noqa: E402
+    TARGET_HORIZON_MONTHS, time_aware_split,
+)
 from src.models.train import (  # noqa: E402
     BINARY_TARGETS,
+    bootstrap_metric_intervals,
+    mature_label_mask,
+    predictability_ceiling,
+    slice_metrics,
     train_binary_target,
     train_next_state,
 )
@@ -124,11 +132,49 @@ def main() -> None:
             if result.reliability is not None:
                 block("Reliability (equal-count bins)",
                       result.reliability.round(5).to_string(index=False))
-            if result.segment_calibration is not None and len(result.segment_calibration):
-                block("Calibration by credit band",
-                      result.segment_calibration.to_string(index=False))
+            for column, table in (result.segment_calibration or {}).items():
+                block("Calibration by {} — {}".format(
+                          column.replace("_", " "), target),
+                      table.to_string(index=False))
 
+        # ---- confidence intervals and slice diagnostics -------------
         model, cols = result.models[result.champion]
+        usable = features[features[target].notna()]
+        usable = usable[mature_label_mask(usable, target)]
+        split = time_aware_split(
+            usable, purge_months=TARGET_HORIZON_MONTHS.get(target, 0),
+            test_fraction=0.2,
+        )
+        if len(split.test):
+            p_test = model.predict_proba(split.test[cols])[:, 1]
+            if result.calibration is not None:
+                p_test = result.calibration.apply(p_test)
+
+            ci = bootstrap_metric_intervals(
+                split.test[target], p_test, groups=split.test[LOAN_ID_COLUMN])
+            if "roc_auc_point" in ci:
+                body = chr(10).join([
+                    "ROC-AUC  {roc_auc_point}  [{roc_auc_lo}, {roc_auc_hi}]",
+                    "PR-AUC   {pr_auc_point}  [{pr_auc_lo}, {pr_auc_hi}]",
+                    "",
+                    "resampled over {n_clusters:,} loans, "
+                    "{n_boot_usable} usable draws",
+                ]).format(**ci)
+                block("Confidence intervals — {}".format(target), body)
+                snapshot.setdefault("intervals", {})[target] = ci
+
+            threshold = float(np.quantile(p_test, 0.95))
+            for segment in ("credit_score_band", "state"):
+                if segment not in split.test.columns:
+                    continue
+                sl = slice_metrics(split.test, split.test[target], p_test,
+                                   segment, threshold=threshold)
+                if len(sl):
+                    block("By {} — {}".format(segment, target),
+                          sl.to_string(index=False))
+                    snapshot.setdefault("slices", {}).setdefault(
+                        target, {})[segment] = sl.to_dict(orient="records")
+
         joblib.dump(
             {"model": model, "columns": cols, "calibration": result.calibration,
              "target": target, "champion": result.champion},
@@ -157,6 +203,35 @@ def main() -> None:
         "champion": ns.champion,
         "metrics": ns.metrics.to_dict(orient="records"),
     }
+
+    # ----------------------------------------- predictability ceiling
+    log.info("Measuring predictability ceilings")
+    ceilings = []
+    for target in BINARY_TARGETS:
+        if target not in features.columns:
+            continue
+        ceilings.append(predictability_ceiling(features, target))
+    ceiling_df = pd.DataFrame(ceilings)
+    if len(ceiling_df):
+        show = [c for c in ("target", "temporal_roc_auc", "random_roc_auc",
+                            "temporal_lift", "random_lift",
+                            "share_lost_to_time")
+                if c in ceiling_df.columns]
+        block("Predictability ceiling: how much is lost to time",
+              ceiling_df[show].to_string(index=False))
+        emit()
+        emit("A weak out-of-time score has two very different causes and "
+             "opposite remedies. If the same model scores well under a "
+             "random split, the features carry signal that does not "
+             "survive the passage of time -- a drift problem. If it scores "
+             "badly under both, the signal was never there and no feature "
+             "work will help.")
+        emit()
+        emit("**The random column is a diagnostic ceiling, not a "
+             "performance claim.** It lets the model see the future and "
+             "must never be reported as deployment performance. Only the "
+             "temporal column is a real estimate.")
+        snapshot["predictability_ceiling"] = ceiling_df.to_dict(orient="records")
 
     # --------------------------------------------------------- summary
     rows = []

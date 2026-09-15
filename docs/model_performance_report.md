@@ -84,7 +84,7 @@ n_calibration_rows    : 10725
   10 1518         0.23247        0.23781 -0.00534
 ```
 
-### Calibration by credit band
+### Calibration by credit score band — next_3m_delinquency_flag
 
 ```
 segment    n  predicted_rate  observed_rate      gap    brier
@@ -94,6 +94,56 @@ segment    n  predicted_rate  observed_rate      gap    brier
 700-739 4009         0.04893        0.05388 -0.00495 0.035361
 740-779 3509         0.04877        0.05301 -0.00423 0.039060
    780+ 2904         0.03836        0.04098 -0.00262 0.032067
+```
+
+### Calibration by vintage — next_3m_delinquency_flag
+
+```
+ segment    n  predicted_rate  observed_rate      gap    brier
+    2022 4056         0.03821        0.06016 -0.02195 0.042977
+    2021 3739         0.04386        0.05509 -0.01124 0.039960
+    2023 1421         0.03163        0.04222 -0.01060 0.031503
+    2019 2925         0.06147        0.05675  0.00472 0.039128
+    2020 3044         0.06055        0.06012  0.00043 0.043963
+```
+
+### Confidence intervals — next_3m_delinquency_flag
+
+```
+ROC-AUC  0.7011  [0.6674, 0.7371]
+PR-AUC   0.4114  [0.3459, 0.4675]
+
+resampled over 1,498 loans, 400 usable draws
+```
+
+### By credit_score_band — next_3m_delinquency_flag
+
+```
+segment    n  observed_rate  mean_prediction  selection_rate  roc_auc  pr_auc_lift
+620-659 1542        0.08690          0.06177         0.07652   0.6801         5.17
+   <620  768        0.07943          0.06131         0.06250   0.7502         6.33
+660-699 2453        0.05830          0.04361         0.04158   0.7394         6.23
+700-739 4009        0.05388          0.04893         0.04640   0.7185         8.84
+740-779 3509        0.05301          0.04877         0.05928   0.6734         7.30
+   780+ 2904        0.04098          0.03836         0.03409   0.6394         7.87
+```
+
+### By state — next_3m_delinquency_flag
+
+```
+segment    n  observed_rate  mean_prediction  selection_rate  roc_auc  pr_auc_lift
+     AZ 1135        0.07137          0.05917         0.06256   0.7591         7.80
+     NY 1393        0.06748          0.04493         0.03518   0.6115         5.36
+     FL 1710        0.06667          0.04475         0.04211   0.7056         5.10
+     CA 2365        0.05751          0.04468         0.03890   0.7040         7.84
+     OH  975        0.05641          0.04785         0.04000   0.6485         7.59
+     NC  767        0.05606          0.04570         0.04563   0.7706         7.17
+     GA 1096        0.05566          0.05386         0.05201   0.7491        10.40
+     IL 1290        0.05194          0.04664         0.05581   0.6745         4.42
+     PA  886        0.05192          0.04977         0.04515   0.7613         9.20
+     TX 1940        0.05103          0.05890         0.09794   0.7289         7.49
+     MI  724        0.04558          0.04651         0.04558   0.6352         8.49
+     WA  904        0.03319          0.02559         0.01217   0.6782         8.35
 ```
 
 ---
@@ -149,7 +199,7 @@ n_calibration_rows    : 8804
   10 1333         0.20868        0.23856 -0.02988
 ```
 
-### Calibration by credit band
+### Calibration by credit score band — next_6m_delinquency_flag
 
 ```
 segment    n  predicted_rate  observed_rate      gap    brier
@@ -159,6 +209,56 @@ segment    n  predicted_rate  observed_rate      gap    brier
 740-779 3096         0.05733        0.08107 -0.02374 0.068326
 700-739 3524         0.06218        0.07633 -0.01415 0.059010
    780+ 2550         0.05072        0.06314 -0.01242 0.054187
+```
+
+### Calibration by vintage — next_6m_delinquency_flag
+
+```
+ segment    n  predicted_rate  observed_rate      gap    brier
+    2019 2725         0.05198        0.08404 -0.03206 0.067502
+    2020 2860         0.06254        0.09406 -0.03152 0.077562
+    2022 3557         0.06182        0.08884 -0.02702 0.075443
+    2021 3516         0.06871        0.08191 -0.01320 0.068155
+    2023  679         0.05680        0.05302  0.00378 0.045814
+```
+
+### Confidence intervals — next_6m_delinquency_flag
+
+```
+ROC-AUC  0.6257  [0.5883, 0.6634]
+PR-AUC   0.299  [0.2408, 0.3559]
+
+resampled over 1,429 loans, 400 usable draws
+```
+
+### By credit_score_band — next_6m_delinquency_flag
+
+```
+segment    n  observed_rate  mean_prediction  selection_rate  roc_auc  pr_auc_lift
+620-659 1355        0.13284          0.07528         0.08266   0.5498         2.20
+   <620  680        0.13088          0.09898         0.15882   0.5881         3.31
+660-699 2132        0.08818          0.05876         0.04221   0.5794         2.07
+740-779 3096        0.08107          0.05733         0.03585   0.6324         3.46
+700-739 3524        0.07633          0.06218         0.04342   0.6915         5.09
+   780+ 2550        0.06314          0.05072         0.03647   0.6014         4.13
+```
+
+### By state — next_6m_delinquency_flag
+
+```
+segment    n  observed_rate  mean_prediction  selection_rate  roc_auc  pr_auc_lift
+     FL 1507        0.10816          0.05249         0.03318   0.6423         2.47
+     NY 1210        0.10165          0.06132         0.04545   0.5520         2.68
+     AZ 1004        0.10060          0.07119         0.09263   0.6988         4.55
+     NC  681        0.09692          0.06794         0.07342   0.5587         3.25
+     CA 2077        0.08570          0.06182         0.03948   0.6287         3.68
+     IL 1122        0.08467          0.05982         0.05882   0.5271         1.45
+     PA  770        0.08442          0.06411         0.05195   0.6223         4.07
+     TX 1726        0.07648          0.06981         0.05736   0.6520         4.20
+     OH  855        0.07602          0.05575         0.04444   0.5867         3.43
+     GA  970        0.07216          0.07071         0.07216   0.7903         6.34
+     MI  627        0.06858          0.04913         0.02233   0.5731         3.90
+     WA  788        0.04695          0.04705         0.01269   0.7374         4.53
 ```
 
 ---
@@ -214,7 +314,7 @@ n_calibration_rows    : 4580
   10 1099         0.01484        0.05551 -0.04067
 ```
 
-### Calibration by credit band
+### Calibration by credit score band — next_12m_default_flag
 
 ```
 segment    n  predicted_rate  observed_rate      gap    brier
@@ -224,6 +324,55 @@ segment    n  predicted_rate  observed_rate      gap    brier
 740-779 2579         0.00259        0.00582 -0.00323 0.005766
 660-699 1765         0.00383        0.00170  0.00213 0.001696
    780+ 2048         0.00233        0.00195  0.00037 0.001951
+```
+
+### Calibration by vintage — next_12m_default_flag
+
+```
+ segment    n  predicted_rate  observed_rate      gap    brier
+    2020 2740         0.00322        0.01314 -0.00992 0.012626
+    2021 3399         0.00394        0.00912 -0.00518 0.008604
+    2019 2575         0.00176        0.00583 -0.00406 0.005736
+    2022 2272         0.00653        0.00572  0.00081 0.005825
+```
+
+### Confidence intervals — next_12m_default_flag
+
+```
+ROC-AUC  0.8598  [0.7722, 0.9244]
+PR-AUC   0.1639  [0.0327, 0.3322]
+
+resampled over 1,299 loans, 400 usable draws
+```
+
+### By credit_score_band — next_12m_default_flag
+
+```
+segment    n  observed_rate  mean_prediction  selection_rate  roc_auc  pr_auc_lift
+   <620  562        0.04270          0.01208         0.26690   0.7943         4.93
+700-739 2929        0.01229          0.00324         0.02731   0.8784        28.11
+620-659 1109        0.01172          0.00642         0.14698   0.8553        22.07
+740-779 2579        0.00582          0.00259         0.01396   0.8126         4.89
+   780+ 2048        0.00195          0.00233         0.01562   0.7145         2.29
+660-699 1765        0.00170          0.00383         0.05042   0.9005         9.64
+```
+
+### By state — next_12m_default_flag
+
+```
+segment    n  observed_rate  mean_prediction  selection_rate  roc_auc  pr_auc_lift
+     AZ  794        0.02267          0.00397         0.06045   0.9456        29.13
+     PA  636        0.02044          0.00568         0.13208   0.8810        20.27
+     GA  816        0.01961          0.00308         0.03309   0.7829        13.81
+     TX 1472        0.01427          0.00502         0.09035   0.8587        28.25
+     NY  996        0.01205          0.00307         0.02510   0.7291         2.79
+     CA 1717        0.00582          0.00269         0.02271   0.9182        11.02
+     FL 1221        0.00328          0.00489         0.07125   0.8959         6.61
+     OH  692        0.00145          0.00410         0.02601   0.9986       346.00
+     NC  582        0.00000          0.00322         0.03608      NaN          NaN
+     MI  495        0.00000          0.00309         0.03030      NaN          NaN
+     IL  919        0.00000          0.00305         0.03047      NaN          NaN
+     WA  652        0.00000          0.00345         0.03834      NaN          NaN
 ```
 
 ---
@@ -279,7 +428,7 @@ n_calibration_rows    : 4580
   10 1099         0.25350        0.17379 0.07971
 ```
 
-### Calibration by credit band
+### Calibration by credit score band — next_12m_prepayment_flag
 
 ```
 segment    n  predicted_rate  observed_rate     gap    brier
@@ -289,6 +438,55 @@ segment    n  predicted_rate  observed_rate     gap    brier
 620-659 1109         0.14980        0.12083 0.02897 0.103423
 740-779 2579         0.11343        0.08724 0.02618 0.082053
    780+ 2048         0.10000        0.08740 0.01260 0.079198
+```
+
+### Calibration by vintage — next_12m_prepayment_flag
+
+```
+ segment    n  predicted_rate  observed_rate     gap    brier
+    2022 2272         0.14211        0.09507 0.04704 0.085489
+    2019 2575         0.11192        0.06757 0.04435 0.066770
+    2020 2740         0.12452        0.09635 0.02817 0.088101
+    2021 3399         0.12581        0.10238 0.02342 0.091796
+```
+
+### Confidence intervals — next_12m_prepayment_flag
+
+```
+ROC-AUC  0.5779  [0.5329, 0.6229]
+PR-AUC   0.1348  [0.1046, 0.1757]
+
+resampled over 1,299 loans, 400 usable draws
+```
+
+### By credit_score_band — next_12m_prepayment_flag
+
+```
+segment    n  observed_rate  mean_prediction  selection_rate  roc_auc  pr_auc_lift
+   <620  562        0.17616          0.24125         0.53559   0.5997         1.16
+620-659 1109        0.12083          0.14980         0.10730   0.6750         1.76
+660-699 1765        0.09292          0.12547         0.03229   0.5606         1.80
+   780+ 2048        0.08740          0.10000         0.00830   0.5699         1.56
+740-779 2579        0.08724          0.11343         0.00504   0.4774         1.02
+700-739 2929        0.06897          0.12302         0.01468   0.5417         1.03
+```
+
+### By state — next_12m_prepayment_flag
+
+```
+segment    n  observed_rate  mean_prediction  selection_rate  roc_auc  pr_auc_lift
+     NC  582        0.11856          0.15127         0.04296   0.4460         1.31
+     TX 1472        0.11481          0.11963         0.05027   0.6150         1.45
+     FL 1221        0.10893          0.11011         0.03849   0.5788         1.80
+     GA  816        0.10417          0.13648         0.04902   0.5556         1.52
+     PA  636        0.09591          0.12618         0.05031   0.5361         1.77
+     NY  996        0.09538          0.12486         0.03514   0.4853         1.21
+     MI  495        0.09495          0.15639         0.14141   0.5915         1.66
+     CA 1717        0.08270          0.12753         0.04368   0.6201         1.76
+     WA  652        0.07209          0.13417         0.08129   0.5946         2.57
+     IL  919        0.06638          0.09487         0.00000   0.4928         1.77
+     OH  692        0.06358          0.13453         0.09104   0.6584         2.39
+     AZ  794        0.06297          0.12861         0.04534   0.6927         1.72
 ```
 
 ---
@@ -315,6 +513,20 @@ hierarchical (stage A + stage B) 15963    0.9647    0.6031       0.9596   0.1964
 ```
 
 > Persistence reaches macro-F1 0.6585 against the champion's 0.6031, but at log-loss 0.7387 against 0.1964 -- it wins the hard-label metric by refusing to predict change at all, while being 3.8x worse as a probability. Reported for honesty; not selectable.
+
+### Predictability ceiling: how much is lost to time
+
+```
+                  target  temporal_roc_auc  random_roc_auc  temporal_lift  random_lift  share_lost_to_time
+next_3m_delinquency_flag            0.7150          0.7629          6.945       10.112              0.3132
+next_6m_delinquency_flag            0.6579          0.6481          3.470        3.768              0.0791
+   next_12m_default_flag            0.6096          0.8483          3.023       42.463              0.9288
+next_12m_prepayment_flag            0.5313          0.6261          1.117        1.782              0.3732
+```
+
+A weak out-of-time score has two very different causes and opposite remedies. If the same model scores well under a random split, the features carry signal that does not survive the passage of time -- a drift problem. If it scores badly under both, the signal was never there and no feature work will help.
+
+**The random column is a diagnostic ceiling, not a performance claim.** It lets the model see the future and must never be reported as deployment performance. Only the temporal column is a real estimate.
 
 ---
 

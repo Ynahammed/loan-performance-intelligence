@@ -334,10 +334,17 @@ def train_binary_target(
         rows.append(m)
 
         reliability = reliability_diagram_data(split.test[target], p_test_cal)
-        if "credit_score_band" in split.test.columns:
-            segment_cal = calibration_by_segment(
-                split.test[target], p_test_cal, split.test["credit_score_band"]
-            )
+        # Calibrated overall does not mean calibrated everywhere: errors in
+        # opposite directions cancel in the aggregate. Checked by credit
+        # band AND by vintage, because a model can be well calibrated on
+        # today's borrowers and badly calibrated on a particular cohort.
+        segment_cal = {}
+        for column in ("credit_score_band", "vintage"):
+            if column in split.test.columns:
+                table = calibration_by_segment(
+                    split.test[target], p_test_cal, split.test[column])
+                if len(table):
+                    segment_cal[column] = table
 
     metrics = pd.DataFrame(rows)
     front = ["model", "n_features", "calibrated", "n", "prevalence", "roc_auc",
@@ -539,3 +546,206 @@ def train_next_state(
         models={}, split_description=split.describe(),
         n_train=len(train_df), n_test=len(test_df), notes=notes,
     )
+
+
+# ---------------------------------------------------------------------------
+# Predictability ceiling
+# ---------------------------------------------------------------------------
+
+
+def predictability_ceiling(
+    df: pd.DataFrame,
+    target: str,
+    test_fraction: float = 0.2,
+    random_state: int = RANDOM_SEED,
+) -> dict:
+    """How much of a target's difficulty is temporal transfer, and how much
+    is that the signal was never there?
+
+    A weak out-of-time score has two very different explanations, and the
+    remedies are opposite. If the same model scores well under a random
+    split, the features carry signal that does not survive the passage of
+    time -- a drift problem, worth attacking with period-relative
+    features. If it scores badly under BOTH, the signal is absent and no
+    amount of feature work will help.
+
+    So this fits the same recipe twice:
+
+      TEMPORAL  chronological, purged. The deployment setting, and the
+                only number that should ever be reported as performance.
+      RANDOM    loan-disjoint but time-blind. NOT a valid estimate of
+                deployment performance -- it lets the model see the
+                future. It is a diagnostic ceiling and nothing else.
+
+    The gap between them is the cost of time. The random figure alone is
+    the cost of the data.
+    """
+    from sklearn.model_selection import GroupShuffleSplit
+
+    usable = df[df[target].notna()]
+    usable = usable[mature_label_mask(usable, target)]
+    horizon = TARGET_HORIZON_MONTHS.get(target, 0)
+    cols = feature_columns(usable)
+    out = {"target": target, "horizon_months": horizon}
+
+    def _score(train_df, test_df, label):
+        y_tr = train_df[target].astype(int)
+        y_te = test_df[target].astype(int)
+        if y_tr.nunique() < 2 or y_te.nunique() < 2:
+            return None
+        model = make_improved(train_df, cols, random_state)
+        pos = max(int(y_tr.sum()), 1)
+        neg = max(len(y_tr) - pos, 1)
+        model.fit(train_df[cols], y_tr,
+                  clf__sample_weight=np.where(y_tr == 1, neg / pos, 1.0))
+        p = model.predict_proba(test_df[cols])[:, 1]
+        pr = float(average_precision_score(y_te, p))
+        prevalence = float(y_te.mean())
+        return {
+            label + "_roc_auc": round(float(roc_auc_score(y_te, p)), 4),
+            label + "_pr_auc": round(pr, 4),
+            # PR-AUC is not comparable across splits with different base
+            # rates, and these two splits have different ones. Comparing
+            # raw PR-AUC made 6-month delinquency look like it IMPROVED
+            # out of time by 32%, purely because its temporal test window
+            # happened to be 8.5% positive against the random split's
+            # 6.0%. Lift over the base rate is the comparable quantity.
+            label + "_lift": round(pr / prevalence, 3) if prevalence else None,
+            label + "_prevalence": round(prevalence, 5),
+            label + "_n_test": int(len(y_te)),
+        }
+
+    split = time_aware_split(usable, purge_months=horizon,
+                            test_fraction=test_fraction)
+    temporal = _score(split.train, split.test, "temporal")
+    if temporal:
+        out.update(temporal)
+
+    gss = GroupShuffleSplit(n_splits=1, test_size=test_fraction + 0.05,
+                            random_state=random_state)
+    tr_idx, te_idx = next(gss.split(usable, groups=usable[LOAN_ID_COLUMN]))
+    random_scores = _score(usable.iloc[tr_idx], usable.iloc[te_idx], "random")
+    if random_scores:
+        out.update(random_scores)
+
+    if temporal and random_scores:
+        t_lift = out.get("temporal_lift")
+        r_lift = out.get("random_lift")
+        if t_lift is not None and r_lift:
+            out["share_lost_to_time"] = round((r_lift - t_lift) / r_lift, 4)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Uncertainty around the metrics themselves
+# ---------------------------------------------------------------------------
+
+
+def bootstrap_metric_intervals(
+    y_true,
+    y_score,
+    groups=None,
+    n_boot: int = 400,
+    alpha: float = 0.05,
+    random_state: int = RANDOM_SEED,
+) -> dict:
+    """Percentile confidence intervals for ROC-AUC and PR-AUC.
+
+    CLUSTERED BY LOAN, not by row. The same loan contributes many rows and
+    those rows are far from independent -- a borrower who defaults appears
+    as a positive in every month leading up to it. Resampling rows
+    individually treats that correlated block as many independent
+    observations and reports an interval far narrower than the evidence
+    supports. Resampling whole loans keeps each borrower's history intact.
+
+    This matters most exactly where it is least convenient: 12-month
+    default rests on roughly 66 events, so the interval around its PR-AUC
+    is wide, and a point estimate quoted without one invites more
+    confidence than the data can carry.
+    """
+    y_true = np.asarray(y_true).astype(int)
+    y_score = np.asarray(y_score, dtype=float)
+    rng = np.random.default_rng(random_state)
+
+    if groups is None:
+        groups = np.arange(len(y_true))
+    groups = np.asarray(groups)
+    unique = np.unique(groups)
+    index_of = {g: np.flatnonzero(groups == g) for g in unique}
+
+    roc, pr = [], []
+    for _ in range(n_boot):
+        picked = rng.choice(unique, size=len(unique), replace=True)
+        idx = np.concatenate([index_of[g] for g in picked])
+        yt, ys = y_true[idx], y_score[idx]
+        if len(set(yt)) < 2:
+            continue
+        roc.append(roc_auc_score(yt, ys))
+        pr.append(average_precision_score(yt, ys))
+
+    if len(roc) < 30:
+        return {"n_boot_usable": len(roc),
+                "note": "too few usable resamples for an interval"}
+
+    lo, hi = 100 * alpha / 2, 100 * (1 - alpha / 2)
+    return {
+        "n_boot_usable": len(roc),
+        "n_clusters": int(len(unique)),
+        "roc_auc_point": round(float(roc_auc_score(y_true, y_score)), 4),
+        "roc_auc_lo": round(float(np.percentile(roc, lo)), 4),
+        "roc_auc_hi": round(float(np.percentile(roc, hi)), 4),
+        "pr_auc_point": round(float(average_precision_score(y_true, y_score)), 4),
+        "pr_auc_lo": round(float(np.percentile(pr, lo)), 4),
+        "pr_auc_hi": round(float(np.percentile(pr, hi)), 4),
+    }
+
+
+def slice_metrics(
+    df: pd.DataFrame,
+    y_true,
+    y_score,
+    segment_column: str,
+    threshold: float = 0.5,
+    min_rows: int = 200,
+) -> pd.DataFrame:
+    """Performance and selection rate by segment.
+
+    A diagnostic, not a verdict. Differences here have several possible
+    causes -- genuinely different risk, different base rates, or the model
+    serving one group worse than another -- and this table cannot tell
+    them apart. It surfaces where to look; deciding what a gap means needs
+    context this system does not have.
+
+    `selection_rate` is the share of a segment flagged at the operating
+    threshold. A large gap in selection rate alongside a similar observed
+    rate is the pattern worth investigating.
+    """
+    y_true = np.asarray(y_true).astype(int)
+    y_score = np.asarray(y_score, dtype=float)
+    frame = pd.DataFrame({
+        "segment": df[segment_column].astype(str).to_numpy(),
+        "y": y_true,
+        "p": y_score,
+    })
+
+    rows = []
+    for segment, group in frame.groupby("segment"):
+        if len(group) < min_rows:
+            continue
+        entry = {
+            "segment": segment,
+            "n": len(group),
+            "observed_rate": round(float(group.y.mean()), 5),
+            "mean_prediction": round(float(group.p.mean()), 5),
+            "selection_rate": round(float((group.p >= threshold).mean()), 5),
+        }
+        if group.y.nunique() > 1:
+            entry["roc_auc"] = round(float(roc_auc_score(group.y, group.p)), 4)
+            entry["pr_auc_lift"] = round(
+                float(average_precision_score(group.y, group.p) / group.y.mean()), 2
+            )
+        rows.append(entry)
+
+    out = pd.DataFrame(rows)
+    return out.sort_values("observed_rate", ascending=False).reset_index(drop=True) \
+        if len(out) else out

@@ -59,7 +59,7 @@ st.caption(
 if "provider" in log.columns:
     st.subheader("By provider")
     mix = log.groupby(["provider", "model"]).size().rename("calls").reset_index()
-    st.dataframe(mix, use_container_width=True, hide_index=True)
+    st.dataframe(mix, width="stretch", hide_index=True)
     if (log.provider == "fault-injection").any():
         st.caption(
             "`fault-injection` rows are text we wrote deliberately to "
@@ -77,7 +77,7 @@ if len(rejected):
     if counts:
         st.dataframe(
             pd.Series(counts).rename("rejections").sort_values(ascending=False)
-            .to_frame(), use_container_width=True,
+            .to_frame(), width="stretch",
         )
     st.caption(
         "Across live runs the dominant genuine failure was "

@@ -4,10 +4,17 @@
 # data/*.csv
 # data/*.json
 
-# Models / artifacts
+# Models / artifacts. Large refits stay out, but the models the dashboard
+# actually loads are tracked so a clone -- or a deployed instance -- works
+# without running the full pipeline first. `models/*.joblib` only matches
+# the top level, which is why models/supervised/ was already tracked by
+# accident while models/transition_model.joblib was not: the what-if
+# simulator returned probabilities but no next-state prediction.
 models/*.joblib
 models/*.pkl
 !models/.gitkeep
+!models/transition_model.joblib
+!models/supervised/
 
 # Logs
 logs/*.jsonl
@@ -32,3 +39,12 @@ __pycache__/
 
 # OS
 .DS_Store
+
+# Editor / assistant tooling. Machine-local, and useless to
+# anyone without the same tool installed.
+.claude/
+.vscode/
+
+# Personal working documents, not deliverables.
+docs/demo_video_script.pdf
+scripts/build_demo_script.py

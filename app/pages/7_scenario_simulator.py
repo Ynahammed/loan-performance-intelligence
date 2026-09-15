@@ -36,7 +36,7 @@ curves = load_csv("scenario_curves.csv")
 macro_path = DATA_DIR / "macro_scenarios.csv"
 if macro_path.exists():
     st.subheader("Scenario assumptions")
-    st.dataframe(pd.read_csv(macro_path), use_container_width=True,
+    st.dataframe(pd.read_csv(macro_path), width="stretch",
                  hide_index=True)
     st.caption(
         "Multipliers come from `macro_scenarios.csv`. Stressed transitions "
@@ -70,7 +70,7 @@ metric = st.radio("Curve", ["cif_default", "cif_prepaid", "delinquency_share"],
                   }[k])
 fig = px.line(curves, x="month", y=metric, color="scenario", markers=True)
 fig.update_layout(height=380, xaxis_title="months ahead", yaxis_title="probability")
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width="stretch")
 
 # --------------------------------------------------------- segments
 require("segment_impacts.csv")
@@ -88,13 +88,13 @@ if "adverse_credit" in wide.columns and "base" in wide.columns:
 
 min_n = st.slider("Minimum records in segment", 1, 400, 50)
 wide = wide[wide.n >= min_n]
-st.dataframe(wide, use_container_width=True, hide_index=True)
+st.dataframe(wide, width="stretch", hide_index=True)
 
 if "uplift_pp" in wide.columns and len(wide):
     fig = px.bar(wide.head(15), x="segment", y="uplift_pp")
     fig.update_layout(height=340, xaxis_title="",
                       yaxis_title="adverse-scenario default uplift (pp)")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
     st.caption(
         "Segments are ranked by how much the adverse-credit scenario "
         "raises their projected default rate. Thin segments are noisy — "
@@ -144,32 +144,39 @@ current = history.loc[row_index]
 
 st.subheader("Adjust inputs")
 overrides = {}
-columns = st.columns(3)
-for i, (name, spec) in enumerate(OVERRIDABLE_FIELDS.items()):
-    if name not in history.columns:
-        continue
-    col = columns[i % 3]
-    value = current[name]
-    if spec["kind"] == "number":
-        new = col.number_input(
-            spec["label"], value=float(value) if pd.notna(value) else 0.0,
-            step=spec.get("step", 1.0), key="wf_" + name,
-        )
-    elif spec["kind"] == "binary":
-        new = int(col.checkbox(
-            spec["label"], value=bool(value), key="wf_" + name))
-    else:
-        options = field_options(panel, name)
-        current_value = str(value) if pd.notna(value) else options[0]
-        idx = options.index(current_value) if current_value in options else 0
-        new = col.selectbox(spec["label"], options, index=idx, key="wf_" + name)
 
-    original = float(value) if spec["kind"] in ("number", "binary") and pd.notna(value) else value
-    if spec["kind"] in ("number", "binary"):
-        if not pd.isna(value) and abs(float(new) - float(value)) > 1e-9:
+# A fresh column row per group of three. Reusing one `st.columns(3)` for
+# every field lets a short control (the Modified checkbox) pull the next
+# widget in that column upwards, so the grid stops lining up after the
+# first row. Chunking guarantees each row shares a baseline.
+available = [(n, sp) for n, sp in OVERRIDABLE_FIELDS.items()
+             if n in history.columns]
+rows = [available[i:i + 3] for i in range(0, len(available), 3)]
+
+for group in rows:
+    columns = st.columns(3)
+    for col, (name, spec) in zip(columns, group):
+        value = current[name]
+        if spec["kind"] == "number":
+            new = col.number_input(
+                spec["label"], value=float(value) if pd.notna(value) else 0.0,
+                step=spec.get("step", 1.0), key="wf_" + name,
+            )
+        elif spec["kind"] == "binary":
+            new = int(col.checkbox(
+                spec["label"], value=bool(value), key="wf_" + name))
+        else:
+            options = field_options(panel, name)
+            current_value = str(value) if pd.notna(value) else options[0]
+            idx = options.index(current_value) if current_value in options else 0
+            new = col.selectbox(spec["label"], options, index=idx,
+                                key="wf_" + name)
+
+        if spec["kind"] in ("number", "binary"):
+            if not pd.isna(value) and abs(float(new) - float(value)) > 1e-9:
+                overrides[name] = new
+        elif str(new) != str(value):
             overrides[name] = new
-    elif str(new) != str(value):
-        overrides[name] = new
 
 if not overrides:
     st.info("Change at least one input above to run a simulation.")
@@ -178,19 +185,32 @@ if not overrides:
 result = simulate(history, row_index, overrides, models)
 
 st.subheader("Effect on the model's estimates")
+st.caption(
+    "Red marks an adverse move. That includes prepayment: it is a stress "
+    "case in `macro_scenarios.csv` for the same reason it is adverse here "
+    "— prepayment removes future interest income for the holder."
+)
 deltas = result.deltas()
 if deltas.empty:
     st.warning("No target could be scored for this record.")
 else:
     cols = st.columns(len(deltas))
     for col, r in zip(cols, deltas.itertuples()):
+        # Every one of these outcomes is adverse when it rises, prepayment
+        # included: `high_prepayment` is a STRESS scenario in
+        # macro_scenarios.csv precisely because prepayment destroys future
+        # interest income for the holder. Colouring a prepayment increase
+        # green would have the dashboard contradict the scenario report on
+        # the same screen. A zero delta is neither good nor bad, so it is
+        # left uncoloured rather than defaulting to green.
+        moved = abs(r.change_pp) > 1e-9
         col.metric(
             r.target.replace("_flag", "").replace("_", " "),
             "{:.2%}".format(r.scenario),
-            "{:+.2f} pp".format(r.change_pp),
-            delta_color="inverse" if "prepayment" not in r.target else "normal",
+            "{:+.2f} pp".format(r.change_pp) if moved else None,
+            delta_color="inverse",
         )
-    st.dataframe(deltas, use_container_width=True, hide_index=True)
+    st.dataframe(deltas, width="stretch", hide_index=True)
 
 if result.baseline_state and result.scenario_state:
     c1, c2 = st.columns(2)
@@ -209,7 +229,7 @@ st.caption(
 st.dataframe(
     pd.DataFrame(result.changed_features,
                  columns=["field", "before", "after"]),
-    use_container_width=True, hide_index=True,
+    width="stretch", hide_index=True,
 )
 
 for note in result.notes:
